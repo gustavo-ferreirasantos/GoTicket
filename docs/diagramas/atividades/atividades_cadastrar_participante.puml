@@ -1,0 +1,31 @@
+@startuml Atividades_Cadastrar_Participante
+title Diagrama de Atividades — UC04: Cadastrar Participante (GoTicket)
+
+start
+
+:Acionado pelo fluxo de "Realizar Venda Presencial";
+:Sistema apresenta formulário do participante na Etapa 2;
+:Funcionário preenche Nome Completo, CPF, E-mail e Telefone;
+:Funcionário clica em "Continuar";
+
+if (Todos os campos obrigatórios foram preenchidos?) then (sim)
+  if (CPF válido com 11 dígitos e cálculo dos dígitos verificadores?) then (sim)
+    if (Formato de E-mail válido?) then (sim)
+      :Sistema valida e formata os dados do participante;
+      :Retorna os dados para a conclusão da transação da venda;
+      :Avança para a Etapa 3 (Pagamento);
+      stop
+    else (não)
+      :Exibe erro: "O E-mail informado é inválido";
+      stop
+    endif
+  else (não)
+    :Exibe erro: "O CPF informado é inválido";
+    stop
+  endif
+else (não)
+  :Exibe erro: "Preencha todos os campos obrigatórios";
+  stop
+endif
+
+@enduml

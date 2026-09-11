@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      alignment="CENTER" spacing="16" VBox.vgrow="ALWAYS" style="-fx-background-color: #FFFFFF;">
+
+    <VBox alignment="CENTER" spacing="12" maxWidth="480.0" styleClass="card-white" style="-fx-padding: 36px;">
+        <Label text="🚧 Módulo em Desenvolvimento" styleClass="title-section"/>
+        <Label text="Esta funcionalidade faz parte do backlog de outro membro da equipe e será disponibilizada nas próximas entregas."
+               wrapText="true" textAlignment="CENTER" styleClass="subtitle-light"/>
+    </VBox>
+
+</VBox>

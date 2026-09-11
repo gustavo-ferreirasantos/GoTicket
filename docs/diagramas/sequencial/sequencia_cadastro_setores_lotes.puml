@@ -1,0 +1,68 @@
+@startuml Sequencia_Cadastro_Setores_Lotes
+title Diagrama de Sequência — UC02: Cadastrar Setores e Lotes (GoTicket)
+
+actor "Funcionário" as User
+boundary "EventoView / EventoController" as UI
+control "SetorService" as SetorServ
+control "TipoIngressoService" as TipoServ
+control "LoteService" as LoteServ
+database "SetorDAO" as SetorDAO
+database "TipoIngressoDAO" as TipoDAO
+database "LoteDAO" as LoteDAO
+database "PostgreSQL" as DB
+
+User -> UI: Clica em "Setores" na linha do Evento
+activate UI
+
+UI -> SetorServ: listarPorEvento(eventoId)
+activate SetorServ
+SetorServ -> SetorDAO: listarPorEvento(eventoId)
+activate SetorDAO
+SetorDAO -> DB: SELECT * FROM setor WHERE evento_id = ?
+DB --> SetorDAO: lista de setores
+SetorDAO --> SetorServ: List<Setor>
+deactivate SetorDAO
+SetorServ --> UI: List<Setor>
+deactivate SetorServ
+
+UI --> User: Exibe tabela de setores e formulário de novo setor
+
+User -> UI: Preenche Setor, Capacidade, Tipo, Preço, Quantidade e clica em "Adicionar Setor"
+
+UI -> SetorServ: cadastrar(SetorDTO)
+activate SetorServ
+SetorServ -> SetorDAO: inserir(Setor)
+activate SetorDAO
+SetorDAO -> DB: INSERT INTO setor (evento_id, nome, capacidade) VALUES (...) RETURNING id
+DB --> SetorDAO: Setor criado
+SetorDAO --> SetorServ: Setor
+deactivate SetorDAO
+SetorServ --> UI: Setor
+deactivate SetorServ
+
+UI -> TipoServ: cadastrar(TipoIngressoDTO)
+activate TipoServ
+TipoServ -> TipoDAO: inserir(TipoIngresso)
+activate TipoDAO
+TipoDAO -> DB: INSERT INTO tipo_ingresso (setor_id, nome, categoria) VALUES (...) RETURNING id
+DB --> TipoDAO: TipoIngresso criado
+TipoDAO --> TipoServ: TipoIngresso
+deactivate TipoDAO
+TipoServ --> UI: TipoIngresso
+deactivate TipoServ
+
+UI -> LoteServ: cadastrar(LoteDTO)
+activate LoteServ
+LoteServ -> LoteDAO: inserir(Lote)
+activate LoteDAO
+LoteDAO -> DB: INSERT INTO lote (tipo_ingresso_id, numero_lote, preco, quantidade_total, quantidade_disponivel, ...) VALUES (...) RETURNING id
+DB --> LoteDAO: Lote criado
+LoteDAO --> LoteServ: Lote
+deactivate LoteDAO
+LoteServ --> UI: Lote
+deactivate LoteServ
+
+UI --> User: Exibe sucesso, limpa formulário e atualiza tabela
+deactivate UI
+
+@enduml

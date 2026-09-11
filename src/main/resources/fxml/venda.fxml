@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.eventgo.controller.VendaController"
+      spacing="20" VBox.vgrow="ALWAYS" style="-fx-background-color: #FFFFFF;">
+
+    <!-- Stepper Indicator (Frames 06, 07, 08, 09) -->
+    <HBox spacing="24" alignment="CENTER_LEFT">
+        <Label fx:id="step1Label" text="1 Seleção" styleClass="step-item, active"/>
+        <Label fx:id="step2Label" text="2 Participantes" styleClass="step-item"/>
+        <Label fx:id="step3Label" text="3 Pagamento" styleClass="step-item"/>
+        <Label fx:id="step4Label" text="4 Comprovante" styleClass="step-item"/>
+    </HBox>
+
+    <Label fx:id="lblEtapaTitulo" text="Nova Venda — Seleção" styleClass="title-modal"/>
+
+    <!-- Dynamic Step Content Area -->
+    <StackPane VBox.vgrow="ALWAYS">
+
+        <!-- ================= STEP 1: SELEÇÃO ================= -->
+        <VBox fx:id="step1Pane" spacing="20" maxWidth="840.0" alignment="TOP_LEFT">
+            <!-- Row Selects -->
+            <HBox spacing="16">
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <Label text="Evento" styleClass="field-label"/>
+                    <ComboBox fx:id="cbEventos" promptText="Selecione um evento..." maxWidth="Infinity" onAction="#aoSelecionarEvento"/>
+                </VBox>
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <Label text="Setor" styleClass="field-label"/>
+                    <ComboBox fx:id="cbSetores" promptText="Selecione o setor" maxWidth="Infinity" onAction="#aoSelecionarSetor"/>
+                </VBox>
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <Label text="Tipo de ingresso" styleClass="field-label"/>
+                    <ComboBox fx:id="cbTiposIngresso" promptText="Selecione o tipo" maxWidth="Infinity" onAction="#aoSelecionarTipo"/>
+                </VBox>
+            </HBox>
+
+            <!-- Quantity Section -->
+            <VBox spacing="8">
+                <Label text="Quantidade" styleClass="field-label"/>
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <Button text="-" styleClass="btn-secondary" prefWidth="38.0" prefHeight="38.0" onAction="#diminuirQuantidade"/>
+                    <TextField fx:id="txtQuantidade" text="1" prefWidth="54.0" prefHeight="38.0" alignment="CENTER"/>
+                    <Button text="+" styleClass="btn-secondary" prefWidth="38.0" prefHeight="38.0" onAction="#aumentarQuantidade"/>
+                    <Label fx:id="lblDisponibilidade" text="0 ingressos disponíveis" styleClass="subtitle-light"/>
+                </HBox>
+            </VBox>
+
+            <!-- Summary Panel -->
+            <VBox styleClass="summary-panel" spacing="12">
+                <HBox alignment="CENTER_LEFT">
+                    <Label fx:id="lblItemResumo" text="1x Ingresso — R$ 0,00" styleClass="subtitle-light" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    <Label fx:id="lblSubtotalResumo" text="R$ 0,00" styleClass="field-label"/>
+                </HBox>
+                <Separator/>
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Total" styleClass="title-section" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    <Label fx:id="lblTotalResumo" text="R$ 0,00" styleClass="title-section" style="-fx-text-fill: #2562EB;"/>
+                </HBox>
+            </VBox>
+
+            <!-- Navigation Buttons -->
+            <HBox spacing="12">
+                <Button text="Cancelar" styleClass="btn-secondary" onAction="#cancelarVenda"/>
+                <Button text="Continuar" styleClass="btn-primary" onAction="#avancarParaStep2"/>
+            </HBox>
+        </VBox>
+
+        <!-- ================= STEP 2: PARTICIPANTES ================= -->
+        <VBox fx:id="step2Pane" visible="false" spacing="20" maxWidth="840.0" alignment="TOP_LEFT">
+            <VBox spacing="12">
+                <Label text="Identificação do Titular do Ingresso" styleClass="title-section"/>
+                <HBox spacing="16">
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="CPF" styleClass="field-label"/>
+                        <TextField fx:id="txtCpfParticipante" promptText="000.000.000-00"/>
+                    </VBox>
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Nome Completo" styleClass="field-label"/>
+                        <TextField fx:id="txtNomeParticipante" promptText="Nome do titular"/>
+                    </VBox>
+                </HBox>
+
+                <HBox spacing="16">
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="E-mail" styleClass="field-label"/>
+                        <TextField fx:id="txtEmailParticipante" promptText="email@exemplo.com"/>
+                    </VBox>
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Telefone" styleClass="field-label"/>
+                        <TextField fx:id="txtTelefoneParticipante" promptText="(00) 00000-0000"/>
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <HBox spacing="12">
+                <Button text="Voltar" styleClass="btn-secondary" onAction="#voltarParaStep1"/>
+                <Button text="Continuar" styleClass="btn-primary" onAction="#avancarParaStep3"/>
+            </HBox>
+        </VBox>
+
+        <!-- ================= STEP 3: PAGAMENTO (FIGMA: Frame08VendaPagamento) ================= -->
+        <VBox fx:id="step3Pane" visible="false" spacing="24" maxWidth="840.0" alignment="TOP_LEFT">
+            <VBox spacing="16">
+                <Label text="Forma de pagamento" styleClass="title-section"/>
+                
+                <!-- Payment Options (Cards) -->
+                <HBox spacing="16" maxWidth="Infinity">
+                    <Button fx:id="btnPayCartao" text="Cartão" styleClass="pay-option-btn, selected" 
+                            maxWidth="Infinity" HBox.hgrow="ALWAYS" onAction="#selecionarCartao"/>
+                    <Button fx:id="btnPayDinheiro" text="Dinheiro" styleClass="pay-option-btn" 
+                            maxWidth="Infinity" HBox.hgrow="ALWAYS" onAction="#selecionarDinheiro"/>
+                    <Button fx:id="btnPayPix" text="PIX" styleClass="pay-option-btn" 
+                            maxWidth="Infinity" HBox.hgrow="ALWAYS" onAction="#selecionarPix"/>
+                </HBox>
+
+                <!-- Summary Panel -->
+                <VBox styleClass="summary-panel" spacing="8" maxWidth="Infinity">
+                    <Label text="Resumo da venda" styleClass="title-section"/>
+                    <HBox alignment="CENTER_LEFT">
+                        <Label fx:id="lblItemResumoStep3" text="2x Pista (Inteira)" styleClass="subtitle-light" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                        <Label fx:id="lblSubtotalStep3" text="R$ 300,00" styleClass="field-label"/>
+                    </HBox>
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Total" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1F2937;" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                        <Label fx:id="lblTotalStep3" text="R$ 300,00" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1F2937;"/>
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <HBox spacing="12">
+                <Button text="Voltar" styleClass="btn-secondary" onAction="#voltarParaStep2"/>
+                <Button text="Confirmar Venda" styleClass="btn-primary" onAction="#confirmarPagamento"/>
+            </HBox>
+        </VBox>
+
+        <!-- ================= STEP 4: COMPROVANTE (FIGMA: Frame09Comprovante) ================= -->
+        <VBox fx:id="step4Pane" visible="false" spacing="20" maxWidth="840.0" alignment="TOP_LEFT">
+            <!-- Success Banner -->
+            <HBox styleClass="success-banner" maxWidth="Infinity">
+                <Label text="✓ Venda concluída" styleClass="success-banner"/>
+            </HBox>
+
+            <!-- Ticket Card (480px) -->
+            <VBox styleClass="ticket-card" spacing="14" maxWidth="480.0" prefWidth="480.0">
+                <Label fx:id="lblComprovanteEventoNome" text="Festival de Verão" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1F2937;"/>
+                <Label fx:id="lblComprovanteEventoDetalhes" text="15/12/2026 · 20:00 · Arena Central" styleClass="subtitle-light"/>
+                
+                <Separator/>
+
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Participante" styleClass="subtitle-light" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    <Label fx:id="lblComprovanteParticipante" text="João da Silva" styleClass="field-label"/>
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Setor" styleClass="subtitle-light" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    <Label fx:id="lblComprovanteSetor" text="Pista (Inteira)" styleClass="field-label"/>
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Identificador" styleClass="subtitle-light" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    <Label fx:id="lblComprovanteIdentificador" text="GT-2026-000842" styleClass="field-label"/>
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Status" styleClass="subtitle-light" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    <Label text="Emitido / Não Utilizado" styleClass="badge-ativo"/>
+                </HBox>
+            </VBox>
+
+            <!-- Actions -->
+            <HBox spacing="12">
+                <Button text="Imprimir Comprovante" styleClass="btn-secondary" onAction="#imprimirComprovante"/>
+                <Button text="Salvar como PDF" styleClass="btn-secondary" onAction="#abrirComprovantePdf"/>
+                <Button text="Nova Venda" styleClass="btn-primary" onAction="#reiniciarFluxoVenda"/>
+            </HBox>
+        </VBox>
+
+    </StackPane>
+
+</VBox>
+

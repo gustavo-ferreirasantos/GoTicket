@@ -1,0 +1,32 @@
+@startuml Atividades_Cadastro_Setores_Lotes
+title Diagrama de Atividades — UC02: Cadastrar Setores e Lotes (GoTicket)
+
+start
+
+:Funcionário autenticado acessa a lista de eventos;
+:Seleciona o evento desejado e clica em "Setores";
+:Sistema exibe a lista de setores já cadastrados e o formulário para novo cadastro;
+
+:Funcionário informa o Nome do Setor e a Capacidade do Setor;
+:Funcionário seleciona o Tipo de Ingresso (ex.: Inteira, Meia-Entrada, VIP);
+:Funcionário informa o Preço do lote e a Quantidade disponível;
+:Funcionário clica em "Adicionar Setor";
+
+if (Dados válidos informados? (Campos preenchidos, preço e quantidade > 0) [Fluxo 06a]) then (sim)
+  if (Capacidade do setor válida? [Fluxo 06b]) then (sim)
+    :Sistema persiste o Setor no banco de dados;
+    :Sistema cria o Tipo de Ingresso associado;
+    :Sistema cadastra o Lote com quantidade_disponivel = quantidade_total;
+    :Sistema exibe mensagem de sucesso;
+    :Atualiza a tabela de setores e lotes do evento;
+    stop
+  else (não)
+    :Exibe erro: "Capacidade do setor inválida";
+    stop
+  endif
+else (não)
+  :Exibe erro: "Dados inválidos informados (preço ou quantidade inválidos)";
+  stop
+endif
+
+@enduml

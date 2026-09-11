@@ -1,0 +1,441 @@
+/* ============================================================
+   GOTICKET - DESIGN SYSTEM (FIEL AO FIGMA)
+   Palette:
+     - Dark Navy (Sidebar / Brand): #1D2532 (rgba(29, 37, 50, 1))
+     - Light Background: #F5F5F7 (rgba(245, 245, 247, 1))
+     - Card / Surface: #FFFFFF
+     - Primary Blue: #2562EB (rgba(37, 98, 235, 1))
+     - Primary Blue Hover: #1D4ED8
+     - Border Color: #E2E4E9 (rgba(226, 228, 233, 1))
+     - Text Primary: #1F2937 (rgba(31, 41, 55, 1))
+     - Text Secondary / Muted: #6A7280 (rgba(106, 114, 128, 1))
+     - Text Dark Muted: #A7B0BD (rgba(167, 176, 189, 1))
+     - Badge Active: BG #DBFBE7, Text #16A24A
+     - Badge Inactive: BG #E2E4E9, Text #6A7280
+   ============================================================ */
+
+* {
+    -fx-font-family: "Roboto", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.root {
+    -fx-background-color: #F5F5F7;
+    -fx-text-fill: #1F2937;
+}
+
+/* ============================================================
+   TYPOGRAPHY & HEADINGS
+   ============================================================ */
+.title-brand-large {
+    -fx-font-size: 32px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #FFFFFF;
+}
+
+.title-page {
+    -fx-font-size: 22px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1F2937;
+}
+
+.title-section {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #1F2937;
+}
+
+.title-modal {
+    -fx-font-size: 20px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1F2937;
+}
+
+.subtitle-dark {
+    -fx-font-size: 14px;
+    -fx-font-weight: 400;
+    -fx-text-fill: #A7B0BD;
+    -fx-line-spacing: 4px;
+}
+
+.subtitle-light {
+    -fx-font-size: 13px;
+    -fx-font-weight: 400;
+    -fx-text-fill: #6A7280;
+}
+
+.field-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-text-fill: #1F2937;
+}
+
+.link-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #2562EB;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-cursor: hand;
+    -fx-padding: 4px 8px;
+    -fx-underline: false;
+}
+.link-button:hover {
+    -fx-text-fill: #1D4ED8;
+    -fx-underline: true;
+}
+
+/* ============================================================
+   CONTAINERS, CARDS & PANELS
+   ============================================================ */
+.panel-dark {
+    -fx-background-color: #1D2532;
+}
+
+.content-panel {
+    -fx-background-color: #FFFFFF;
+    -fx-padding: 32px;
+}
+
+.card-white {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E2E4E9;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 16px;
+}
+
+.shortcut-card {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E2E4E9;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 20px 16px;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER_LEFT;
+}
+.shortcut-card:hover {
+    -fx-border-color: #2562EB;
+    -fx-background-color: #F8FAFC;
+    -fx-effect: dropshadow(three-pass-box, rgba(37, 98, 235, 0.08), 8, 0, 0, 2);
+}
+.shortcut-card-text {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #1F2937;
+}
+
+/* Summary Box in Venda / Checkout */
+.summary-panel {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E2E4E9;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 16px 20px;
+}
+
+/* ============================================================
+   INPUTS & FORM CONTROLS
+   ============================================================ */
+.text-field, .password-field, .combo-box, .date-picker, .spinner {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E2E4E9;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-text-fill: #1F2937;
+    -fx-font-size: 13px;
+    -fx-font-weight: 400;
+    -fx-padding: 9px 12px;
+    -fx-prompt-text-fill: #6A7280;
+}
+
+.text-field:focused, .password-field:focused, .combo-box:focused, .date-picker:focused, .spinner:focused {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #2562EB;
+    -fx-border-width: 1px;
+}
+
+.text-area {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E2E4E9;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-text-fill: #1F2937;
+    -fx-font-size: 13px;
+    -fx-prompt-text-fill: #6A7280;
+}
+.text-area .content {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 4px;
+}
+.text-area:focused {
+    -fx-border-color: #2562EB;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: #1F2937;
+    -fx-background-color: transparent;
+}
+.combo-box-popup .list-view {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E2E4E9;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.08), 8, 0, 0, 2);
+}
+.combo-box-popup .list-cell {
+    -fx-text-fill: #1F2937;
+    -fx-padding: 8px 12px;
+}
+.combo-box-popup .list-cell:hover {
+    -fx-background-color: #F5F5F7;
+}
+.combo-box-popup .list-cell:selected {
+    -fx-background-color: #EFF6FF;
+    -fx-text-fill: #2562EB;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn-primary {
+    -fx-background-color: #2562EB;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
+    -fx-background-radius: 4px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER;
+}
+.btn-primary:hover {
+    -fx-background-color: #1D4ED8;
+}
+.btn-primary:pressed {
+    -fx-background-color: #1E40AF;
+}
+
+.btn-secondary {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E2E4E9;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-text-fill: #1F2937;
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER;
+}
+.btn-secondary:hover {
+    -fx-background-color: #F9FAFB;
+    -fx-border-color: #D1D5DB;
+}
+.btn-secondary:pressed {
+    -fx-background-color: #F3F4F6;
+}
+
+.btn-table-action {
+    -fx-background-color: transparent;
+    -fx-text-fill: #2562EB;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-cursor: hand;
+    -fx-padding: 2px 6px;
+}
+.btn-table-action:hover {
+    -fx-text-fill: #1D4ED8;
+    -fx-underline: true;
+}
+
+/* ============================================================
+   SIDEBAR (FIGMA: Frame02MenuPrincipal)
+   ============================================================ */
+.sidebar {
+    -fx-background-color: #1D2532;
+    -fx-padding: 24px 0;
+}
+
+.sidebar-logo {
+    -fx-font-size: 20px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #FFFFFF;
+    -fx-padding: 0 24px 16px 24px;
+}
+
+.sidebar-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: #A7B0BD;
+    -fx-font-size: 14px;
+    -fx-font-weight: 400;
+    -fx-alignment: BASELINE_LEFT;
+    -fx-padding: 12px 24px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+}
+.sidebar-item:hover {
+    -fx-background-color: #273244;
+    -fx-text-fill: #FFFFFF;
+}
+.sidebar-item.active {
+    -fx-background-color: #2562EB;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: 500;
+}
+
+/* ============================================================
+   TABLEVIEW (FIGMA SPEC)
+   ============================================================ */
+.table-view {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 4px;
+    -fx-border-color: #E2E4E9;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #FFFFFF;
+}
+
+.table-view .column-header {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E2E4E9;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 12px 16px;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #6A7280;
+    -fx-font-weight: 600;
+    -fx-font-size: 12px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.table-row-cell {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E2E4E9;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 6px 16px;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #FFFFFF;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #F8FAFC;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #EFF6FF;
+}
+
+.table-row-cell:selected .table-cell {
+    -fx-text-fill: #1E3A8A;
+}
+
+.table-cell {
+    -fx-text-fill: #1F2937;
+    -fx-font-size: 13px;
+    -fx-font-weight: 400;
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* ============================================================
+   BADGES & STATUS PILLS
+   ============================================================ */
+.badge-ativo, .badge-active {
+    -fx-background-color: #DBFBE7;
+    -fx-text-fill: #16A24A;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-background-radius: 4px;
+    -fx-padding: 4px 10px;
+    -fx-alignment: CENTER;
+}
+
+.badge-encerrado, .badge-inactive {
+    -fx-background-color: #E2E4E9;
+    -fx-text-fill: #6A7280;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-background-radius: 4px;
+    -fx-padding: 4px 10px;
+    -fx-alignment: CENTER;
+}
+
+/* ============================================================
+   STEPPER INDICATOR (FIGMA: Frame06 / Frame07)
+   ============================================================ */
+.step-item {
+    -fx-font-size: 13px;
+    -fx-font-weight: 400;
+    -fx-text-fill: #6A7280;
+}
+.step-item.active {
+    -fx-font-weight: 600;
+    -fx-text-fill: #2562EB;
+}
+
+/* ============================================================
+   MODALS & PAYMENT / COMPROVANTE EXTRAS (FIGMA: Frame08 / 09)
+   ============================================================ */
+.modal-container {
+    -fx-background-color: rgba(15, 23, 42, 0.45);
+}
+.modal-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-padding: 28px 32px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.15), 16, 0, 0, 4);
+}
+
+.pay-option-btn {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E2E4E9;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 20px;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #1F2937;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER;
+}
+.pay-option-btn:hover {
+    -fx-background-color: #F8FAFC;
+    -fx-border-color: #CBD5E1;
+}
+.pay-option-btn.selected {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #2562EB;
+    -fx-border-width: 2px;
+    -fx-text-fill: #2562EB;
+}
+
+.success-banner {
+    -fx-background-color: #DBFBE7;
+    -fx-text-fill: #16A24A;
+    -fx-font-size: 15px;
+    -fx-font-weight: 600;
+    -fx-padding: 14px 20px;
+    -fx-background-radius: 4px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.ticket-card {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E2E4E9;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 24px 28px;
+}
+

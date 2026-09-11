@@ -1,0 +1,29 @@
+@startuml Atividades_Emitir_Comprovante
+title Diagrama de Atividades — UC05: Emitir Comprovante / Ingresso Local (GoTicket)
+
+start
+
+:Acionado após a persistência bem-sucedida da venda no banco de dados;
+:Sistema gera identificador único (GT-2026-XXXXXX / UUID) para cada ingresso;
+:Sistema registra status do ingresso como "ATIVO / NÃO UTILIZADO";
+:Sistema formata o layout do Ticket Card com dados do Evento, Setor, Participante e Código;
+:Sistema apresenta a tela de confirmação (Etapa 4);
+
+if (Funcionário clica em "Salvar como PDF"?) then (sim)
+  :Abre seletor de arquivo local;
+  :OpenPDF gera documento PDF formatado do comprovante;
+  :Exibe confirmação de arquivo salvo com sucesso;
+  stop
+else (não)
+  if (Funcionário clica em "Imprimir Comprovante"?) then (sim)
+    :Envia os dados para a fila/spooler de impressão local;
+    :Exibe mensagem de confirmação de envio para a impressora;
+    stop
+  else (não)
+    :Funcionário clica em "Nova Venda";
+    :Reinicia fluxo para uma nova venda limpa;
+    stop
+  endif
+endif
+
+@enduml

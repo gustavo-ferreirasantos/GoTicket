@@ -1,0 +1,32 @@
+@startuml Atividades_Login
+title Diagrama de Atividades — Autenticação de Usuário (GoTicket)
+
+start
+
+:Funcionário abre a aplicação;
+:Sistema apresenta a tela de Login (Frame 01);
+:Funcionário informa Login/E-mail e Senha;
+:Clica em "Entrar";
+
+if (Campos preenchidos?) then (sim)
+  :Sistema consulta usuário no banco pelo login;
+  if (Usuário encontrado e ativo?) then (sim)
+    :Sistema valida senha criptografada via BCrypt;
+    if (Senha correta?) then (sim)
+      :Registra usuário na SessaoUsuario;
+      :Carrega tela principal (Frame 02 - Dashboard);
+      stop
+    else (não)
+      :Exibe erro: "Login ou senha inválidos";
+      stop
+    endif
+  else (não)
+    :Exibe erro: "Login ou senha inválidos";
+    stop
+  endif
+else (não)
+  :Exibe aviso: "Informe o login e a senha";
+  stop
+endif
+
+@enduml

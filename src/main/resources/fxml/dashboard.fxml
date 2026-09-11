@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.eventgo.controller.DashboardController"
+      spacing="24" VBox.vgrow="ALWAYS" style="-fx-background-color: #FFFFFF;">
+
+    <!-- GreetingHeader (Frame02MenuPrincipal) -->
+    <HBox alignment="CENTER_LEFT" spacing="16">
+        <Label fx:id="lblSaudacao" text="Olá, Usuário" styleClass="title-page" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+        <Button text="Sair" styleClass="link-button" onAction="#handleLogout"/>
+    </HBox>
+
+    <!-- ShortcutCards (5 Cards conforme Frame02MenuPrincipal) -->
+    <HBox spacing="16" alignment="CENTER_LEFT">
+        <Button text="Cadastrar Evento" styleClass="shortcut-card" maxWidth="Infinity" HBox.hgrow="ALWAYS"
+                onAction="#atalhoNovoEvento"/>
+        <Button text="Realizar Venda" styleClass="shortcut-card" maxWidth="Infinity" HBox.hgrow="ALWAYS"
+                onAction="#atalhoVenda"/>
+        <Button text="Utilizar Ingresso" styleClass="shortcut-card" maxWidth="Infinity" HBox.hgrow="ALWAYS"
+                onAction="#atalhoCheckin"/>
+        <Button text="Cancelar Ingresso" styleClass="shortcut-card" maxWidth="Infinity" HBox.hgrow="ALWAYS"
+                onAction="#atalhoCancelamento"/>
+        <Button text="Gerar Relatório" styleClass="shortcut-card" maxWidth="Infinity" HBox.hgrow="ALWAYS"
+                onAction="#atalhoRelatorios"/>
+    </HBox>
+
+    <!-- TabelaEventosRecentes (Frame02MenuPrincipal) -->
+    <VBox spacing="12" VBox.vgrow="ALWAYS">
+        <Label text="Eventos recentes" styleClass="title-section"/>
+
+        <TableView fx:id="tabelaProximosEventos" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colNome" text="Nome" prefWidth="320"/>
+                <TableColumn fx:id="colData" text="Data/Horário" prefWidth="260"/>
+                <TableColumn fx:id="colLocal" text="Local" prefWidth="260"/>
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+        </TableView>
+    </VBox>
+
+</VBox>
