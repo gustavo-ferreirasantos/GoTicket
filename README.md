@@ -41,9 +41,3 @@ No Windows (PowerShell / CMD), execute:
 ## 👤 Credenciais de Acesso Inicial
 - **Usuário**: `admin`
 - **Senha**: `admin123`
-
----
-
-## 📂 Documentação e Manuais
-- [Manual do Usuário](docs/manual_usuario.md)
-- [Manual Técnico e Arquitetura](docs/manual_tecnico.md)
