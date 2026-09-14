@@ -38,7 +38,7 @@ public class ValidacaoUtil {
     }
 
     public static boolean isEmailValido(String email) {
-        if (email == null || email.trim().isEmpty()) return false;
+        if (email == null || email.trim().isEmpty()) return true;
         return EMAIL_PATTERN.matcher(email.trim()).matches();
     }
 

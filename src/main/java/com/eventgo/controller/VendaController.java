@@ -437,7 +437,7 @@ public class VendaController implements Initializable {
             // Populate Step 4 Ticket Card
             lblComprovanteEventoNome.setText(evento.getNome());
             String dataStr = evento.getDataEvento() != null ? evento.getDataEvento().format(dateFormatter) : "";
-            String horaStr = evento.getHoraEvento() != null ? evento.getHoraEvento().format(timeFormatter) : "20:00";
+            String horaStr = evento.getHorario() != null ? evento.getHorario().format(timeFormatter) : "20:00";
             String localStr = evento.getLocal() != null ? evento.getLocal() : "Local do Evento";
             lblComprovanteEventoDetalhes.setText(dataStr + " · " + horaStr + " · " + localStr);
 
@@ -445,7 +445,7 @@ public class VendaController implements Initializable {
             lblComprovanteSetor.setText(cbSetores.getValue().getNome() + " (" + cbTiposIngresso.getValue().getNome() + ")");
 
             if (!vendaConcluida.getIngressos().isEmpty()) {
-                lblComprovanteIdentificador.setText(vendaConcluida.getIngressos().get(0).getCodigo());
+                lblComprovanteIdentificador.setText(vendaConcluida.getIngressos().get(0).getCodigo().toString());
             } else {
                 lblComprovanteIdentificador.setText("GT-2026-" + String.format("%06d", vendaConcluida.getId()));
             }
@@ -460,7 +460,7 @@ public class VendaController implements Initializable {
     @FXML
     public void imprimirComprovante() {
         if (vendaConcluida == null || vendaConcluida.getIngressos().isEmpty()) {
-            AlertUtil.exibirInformacao("Comprovante", "Comprovante enviado para a fila de impressão do sistema.");
+            AlertUtil.exibirSucesso("Comprovante enviado para a fila de impressão do sistema.");
             return;
         }
         abrirComprovantePdf();
