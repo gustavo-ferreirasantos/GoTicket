@@ -61,11 +61,15 @@ public class SetorDAO {
     }
 
     public Optional<Setor> buscarPorId(Long id) throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            return buscarPorId(conn, id);
+        }
+    }
+
+    public Optional<Setor> buscarPorId(Connection conn, Long id) throws SQLException {
         String sql = "SELECT id, evento_id, nome, capacidade, criado_em FROM eventgo.setor WHERE id = ?";
 
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {

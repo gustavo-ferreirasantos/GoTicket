@@ -80,17 +80,16 @@ public class LoteService {
             throw new IllegalArgumentException("A data final da vigência não pode ser anterior à data inicial.");
         }
 
-        TipoIngresso tipo = tipoIngressoDAO.buscarPorId(tipoIngressoId)
+        TipoIngresso tipo = tipoIngressoDAO.buscarPorId(conn, tipoIngressoId)
                 .orElseThrow(() -> new IllegalArgumentException("Tipo de ingresso não encontrado."));
-        Setor setor = setorDAO.buscarPorId(tipo.getSetorId())
+        Setor setor = setorDAO.buscarPorId(conn, tipo.getSetorId())
                 .orElseThrow(() -> new IllegalArgumentException("Setor não encontrado."));
 
         int qtdExistente = loteDAO.somarQuantidadeTotalPorTipo(conn, tipoIngressoId, null);
         if (qtdExistente + quantidade > setor.getCapacidade()) {
             int restante = setor.getCapacidade() - qtdExistente;
             throw new IllegalArgumentException(
-                    "A quantidade de ingressos deste lote excede a capacidade do setor (" + setor.getCapacidade() +
-                    "). Quantidade restante disponível para lotes: " + Math.max(0, restante)
+                    "A quantidade de ingressos deste lote excede a capacidade do setor."
             );
         }
 

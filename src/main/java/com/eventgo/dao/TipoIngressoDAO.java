@@ -48,11 +48,15 @@ public class TipoIngressoDAO {
     }
 
     public Optional<TipoIngresso> buscarPorId(Long id) throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            return buscarPorId(conn, id);
+        }
+    }
+
+    public Optional<TipoIngresso> buscarPorId(Connection conn, Long id) throws SQLException {
         String sql = "SELECT id, setor_id, nome, categoria, criado_em FROM eventgo.tipo_ingresso WHERE id = ?";
 
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {
