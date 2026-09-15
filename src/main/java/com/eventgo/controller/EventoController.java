@@ -77,6 +77,7 @@ public class EventoController implements Initializable {
     @FXML private ComboBox<CategoriaIngresso> cbNovoSetorTipo;
     @FXML private TextField txtNovoSetorPreco;
     @FXML private TextField txtNovoSetorQuantidade;
+    @FXML private Label capacidadeLabel;
 
     // Services
     private final EventoService eventoService;
@@ -379,6 +380,12 @@ public class EventoController implements Initializable {
             }
 
             tabelaSetoresLotes.setItems(FXCollections.observableArrayList(rows));
+
+            int capacidadeUsada = setores.stream()
+                    .mapToInt(Setor::getCapacidade)
+                    .sum();
+            int capacidadeRestante = (eventoSelecionado.getCapacidadeTotal() != null ? eventoSelecionado.getCapacidadeTotal() : 0) - capacidadeUsada;
+            capacidadeLabel.setText("Capacidade do setor (" + capacidadeRestante + " restante)");
 
         } catch (SQLException e) {
             AlertUtil.exibirErro("Erro ao carregar setores: " + e.getMessage());

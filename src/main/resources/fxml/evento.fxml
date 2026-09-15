@@ -102,7 +102,6 @@
     <StackPane fx:id="modalSetoresOverlay" visible="false" style="-fx-background-color: #FFFFFF;" alignment="CENTER">
         <VBox styleClass="modal-card" maxWidth="660.0" spacing="18" alignment="TOP_LEFT">
             <Label fx:id="lblModalSetoresTitulo" text="Setores e Lotes — Evento" styleClass="title-modal"/>
-
             <!-- Table Setores -->
             <TableView fx:id="tabelaSetoresLotes" prefHeight="180.0">
                 <columns>
@@ -128,7 +127,7 @@
 
                 <HBox spacing="12">
                     <VBox spacing="6" HBox.hgrow="ALWAYS">
-                        <Label text="Capacidade do setor" styleClass="field-label"/>
+                        <Label fx:id="capacidadeLabel" text="Capacidade do setor" styleClass="field-label"/>
                         <TextField fx:id="txtNovoSetorCapacidade" promptText="Ex: 1000"/>
                     </VBox>
                     <VBox spacing="6" HBox.hgrow="ALWAYS">
