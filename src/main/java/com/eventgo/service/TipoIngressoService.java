@@ -7,6 +7,7 @@ import com.eventgo.model.TipoIngresso;
 import com.eventgo.model.enums.CategoriaIngresso;
 import com.eventgo.util.ValidacaoUtil;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +39,10 @@ public class TipoIngressoService {
         tipo.setCategoria(dto.getCategoria() != null ? dto.getCategoria() : CategoriaIngresso.INTEIRA);
 
         return tipoIngressoDAO.inserir(tipo);
+    }
+
+    public void cadastrar(Connection conn, TipoIngresso tipo) throws SQLException {
+        tipoIngressoDAO.inserir(conn, tipo);
     }
 
     public void remover(Long id) throws SQLException {

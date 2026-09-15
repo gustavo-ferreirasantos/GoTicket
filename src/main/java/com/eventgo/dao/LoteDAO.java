@@ -11,13 +11,17 @@ import java.util.Optional;
 public class LoteDAO {
 
     public Lote inserir(Lote lote) throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            return inserir(conn, lote);
+        }
+    }
+
+    public Lote inserir(Connection conn, Lote lote) throws SQLException {
         String sql = "INSERT INTO eventgo.lote (tipo_ingresso_id, numero_lote, preco, quantidade_total, " +
                      "quantidade_disponivel, data_inicio, data_fim, ativo, criado_em, atualizado_em) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id";
 
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, lote.getTipoIngressoId());
             stmt.setInt(2, lote.getNumeroLote());
             stmt.setBigDecimal(3, lote.getPreco());
@@ -132,12 +136,16 @@ public class LoteDAO {
     }
 
     public int somarQuantidadeTotalPorTipo(Long tipoIngressoId, Long excetoLoteId) throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            return somarQuantidadeTotalPorTipo(conn, tipoIngressoId, excetoLoteId);
+        }
+    }
+
+    public int somarQuantidadeTotalPorTipo(Connection conn, Long tipoIngressoId, Long excetoLoteId) throws SQLException {
         String sql = "SELECT COALESCE(SUM(quantidade_total), 0) AS total FROM eventgo.lote WHERE tipo_ingresso_id = ?" +
                      (excetoLoteId != null ? " AND id <> ?" : "");
 
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, tipoIngressoId);
             if (excetoLoteId != null) {
                 stmt.setLong(2, excetoLoteId);

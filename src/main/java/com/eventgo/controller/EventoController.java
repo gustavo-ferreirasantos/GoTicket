@@ -2,8 +2,8 @@ package com.eventgo.controller;
 
 import com.eventgo.dto.EventoDTO;
 import com.eventgo.dto.FiltroEventoDTO;
-import com.eventgo.dto.LoteDTO;
 import com.eventgo.dto.SetorDTO;
+import com.eventgo.config.DatabaseConfig;
 import com.eventgo.dto.TipoIngressoDTO;
 import com.eventgo.model.Evento;
 import com.eventgo.model.Lote;
@@ -30,6 +30,7 @@ import javafx.scene.layout.VBox;
 
 import java.math.BigDecimal;
 import java.net.URL;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -469,34 +470,42 @@ public class EventoController implements Initializable {
                 return;
             }
 
-            // 1. Cadastrar Setor
-            SetorDTO setorDTO = new SetorDTO();
-            setorDTO.setEventoId(eventoSelecionado.getId());
-            setorDTO.setNome(nomeSetor);
-            setorDTO.setCapacidade(capacidade);
-            Setor setorCriado = setorService.cadastrar(setorDTO);
+            // Cadastrar Setor + TipoIngresso + Lote em uma transação única
+            Connection conn = DatabaseConfig.getConnection();
+            try {
+                conn.setAutoCommit(false);
 
-            // 2. Cadastrar TipoIngresso
-            TipoIngressoDTO tipoDTO = new TipoIngressoDTO();
-            tipoDTO.setSetorId(setorCriado.getId());
-            tipoDTO.setNome(categoria.getDescricao());
-            tipoDTO.setCategoria(categoria);
-            TipoIngresso tipoCriado = tipoIngressoService.cadastrar(tipoDTO);
+                // 1. Cadastrar Setor
+                Setor setor = new Setor();
+                setor.setEventoId(eventoSelecionado.getId());
+                setor.setNome(nomeSetor);
+                setor.setCapacidade(capacidade);
+                setorService.cadastrar(conn, setor);
 
-            // 3. Cadastrar Lote
-            LoteDTO loteDTO = new LoteDTO();
-            loteDTO.setTipoIngressoId(tipoCriado.getId());
-            loteDTO.setNumeroLote(1);
-            loteDTO.setPreco(preco);
-            loteDTO.setQuantidadeTotal(quantidade);
-            loteDTO.setDataInicio(LocalDate.now());
-            loteDTO.setDataFim(eventoSelecionado.getDataEvento() != null ? eventoSelecionado.getDataEvento() : LocalDate.now().plusMonths(1));
-            loteDTO.setAtivo(true);
-            loteService.cadastrar(loteDTO);
+                // 2. Cadastrar TipoIngresso
+                TipoIngresso tipo = new TipoIngresso();
+                tipo.setSetorId(setor.getId());
+                tipo.setNome(categoria.getDescricao());
+                tipo.setCategoria(categoria);
+                tipoIngressoService.cadastrar(conn, tipo);
 
-            AlertUtil.exibirSucesso("Setor e Lote adicionados com sucesso!");
-            limparFormNovoSetor();
-            carregarTabelaSetoresLotes();
+                // 3. Cadastrar Lote (com validação RN-02 na mesma transação)
+                loteService.cadastrar(conn, tipo.getId(), preco, quantidade,
+                        LocalDate.now(),
+                        eventoSelecionado.getDataEvento() != null ? eventoSelecionado.getDataEvento() : LocalDate.now().plusMonths(1));
+
+                conn.commit();
+
+                AlertUtil.exibirSucesso("Setor e Lote adicionados com sucesso!");
+                limparFormNovoSetor();
+                carregarTabelaSetoresLotes();
+
+            } catch (Exception ex) {
+                conn.rollback();
+                throw ex;
+            } finally {
+                conn.close();
+            }
 
         } catch (Exception e) {
             AlertUtil.exibirAviso("Aviso: " + e.getMessage());

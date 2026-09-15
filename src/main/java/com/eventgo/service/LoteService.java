@@ -9,7 +9,9 @@ import com.eventgo.model.Setor;
 import com.eventgo.model.TipoIngresso;
 
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,6 +63,48 @@ public class LoteService {
         lote.setAtivo(dto.isAtivo());
 
         return loteDAO.inserir(lote);
+    }
+
+    public void cadastrar(Connection conn, Long tipoIngressoId, BigDecimal preco, int quantidade,
+                          LocalDate dataInicio, LocalDate dataFim) throws SQLException {
+        if (preco == null || preco.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("O preço do lote não pode ser negativo.");
+        }
+        if (quantidade <= 0) {
+            throw new IllegalArgumentException("A quantidade total do lote deve ser maior que zero.");
+        }
+        if (dataInicio == null || dataFim == null) {
+            throw new IllegalArgumentException("As datas de início e fim da vigência são obrigatórias.");
+        }
+        if (dataFim.isBefore(dataInicio)) {
+            throw new IllegalArgumentException("A data final da vigência não pode ser anterior à data inicial.");
+        }
+
+        TipoIngresso tipo = tipoIngressoDAO.buscarPorId(tipoIngressoId)
+                .orElseThrow(() -> new IllegalArgumentException("Tipo de ingresso não encontrado."));
+        Setor setor = setorDAO.buscarPorId(tipo.getSetorId())
+                .orElseThrow(() -> new IllegalArgumentException("Setor não encontrado."));
+
+        int qtdExistente = loteDAO.somarQuantidadeTotalPorTipo(conn, tipoIngressoId, null);
+        if (qtdExistente + quantidade > setor.getCapacidade()) {
+            int restante = setor.getCapacidade() - qtdExistente;
+            throw new IllegalArgumentException(
+                    "A quantidade de ingressos deste lote excede a capacidade do setor (" + setor.getCapacidade() +
+                    "). Quantidade restante disponível para lotes: " + Math.max(0, restante)
+            );
+        }
+
+        Lote lote = new Lote();
+        lote.setTipoIngressoId(tipoIngressoId);
+        lote.setNumeroLote(1);
+        lote.setPreco(preco);
+        lote.setQuantidadeTotal(quantidade);
+        lote.setQuantidadeDisponivel(quantidade);
+        lote.setDataInicio(dataInicio);
+        lote.setDataFim(dataFim);
+        lote.setAtivo(true);
+
+        loteDAO.inserir(conn, lote);
     }
 
     public void atualizar(LoteDTO dto) throws SQLException {

@@ -12,12 +12,16 @@ import java.util.Optional;
 public class TipoIngressoDAO {
 
     public TipoIngresso inserir(TipoIngresso tipo) throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            return inserir(conn, tipo);
+        }
+    }
+
+    public TipoIngresso inserir(Connection conn, TipoIngresso tipo) throws SQLException {
         String sql = "INSERT INTO eventgo.tipo_ingresso (setor_id, nome, categoria, criado_em) " +
                      "VALUES (?, ?, ?, ?) RETURNING id";
 
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, tipo.getSetorId());
             stmt.setString(2, tipo.getNome());
             stmt.setString(3, tipo.getCategoria().name());

@@ -11,12 +11,16 @@ import java.util.Optional;
 public class SetorDAO {
 
     public Setor inserir(Setor setor) throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            return inserir(conn, setor);
+        }
+    }
+
+    public Setor inserir(Connection conn, Setor setor) throws SQLException {
         String sql = "INSERT INTO eventgo.setor (evento_id, nome, capacidade, criado_em) " +
                      "VALUES (?, ?, ?, ?) RETURNING id";
 
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, setor.getEventoId());
             stmt.setString(2, setor.getNome());
             stmt.setInt(3, setor.getCapacidade());
@@ -93,12 +97,16 @@ public class SetorDAO {
     }
 
     public int somarCapacidadePorEvento(Long eventoId, Long excetoSetorId) throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            return somarCapacidadePorEvento(conn, eventoId, excetoSetorId);
+        }
+    }
+
+    public int somarCapacidadePorEvento(Connection conn, Long eventoId, Long excetoSetorId) throws SQLException {
         String sql = "SELECT COALESCE(SUM(capacidade), 0) AS total FROM eventgo.setor WHERE evento_id = ?" +
                      (excetoSetorId != null ? " AND id <> ?" : "");
 
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, eventoId);
             if (excetoSetorId != null) {
                 stmt.setLong(2, excetoSetorId);

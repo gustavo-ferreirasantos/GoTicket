@@ -7,6 +7,7 @@ import com.eventgo.model.Evento;
 import com.eventgo.model.Setor;
 import com.eventgo.util.ValidacaoUtil;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -47,6 +48,10 @@ public class SetorService {
         setor.setCapacidade(dto.getCapacidade());
 
         return setorDAO.inserir(setor);
+    }
+
+    public void cadastrar(Connection conn, Setor setor) throws SQLException {
+        setorDAO.inserir(conn, setor);
     }
 
     public void atualizar(SetorDTO dto) throws SQLException {
