@@ -459,7 +459,7 @@ public class EventoController implements Initializable {
             try {
                 quantidade = Integer.parseInt(qtdStr);
                 if (quantidade <= 0) {
-                    AlertUtil.exibirAviso("A quantidade do lote deve ser maior que zero.");
+                    AlertUtil.exibirAviso("A quantidade de ingressos do lote deve ser maior que zero.");
                     txtNovoSetorQuantidade.requestFocus();
                     return;
                 }

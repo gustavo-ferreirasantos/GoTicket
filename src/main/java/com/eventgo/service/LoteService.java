@@ -45,7 +45,7 @@ public class LoteService {
         if (qtdExistente + dto.getQuantidadeTotal() > setor.getCapacidade()) {
             int restante = setor.getCapacidade() - qtdExistente;
             throw new IllegalArgumentException(
-                    "A quantidade deste lote excede a capacidade do setor (" + setor.getCapacidade() +
+                    "A quantidade de ingressos deste lote excede a capacidade do setor (" + setor.getCapacidade() +
                     "). Quantidade restante disponível para lotes: " + Math.max(0, restante)
             );
         }
