@@ -24,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.UUID;
 
 public class VendaController implements Initializable {
 
@@ -463,7 +464,24 @@ public class VendaController implements Initializable {
             AlertUtil.exibirSucesso("Comprovante enviado para a fila de impressão do sistema.");
             return;
         }
-        abrirComprovantePdf();
+
+        try {
+            UUID codigo = vendaConcluida.getIngressos().get(0).getCodigo();
+            boolean impresso = ingressoService.imprimirIngressoLocal(codigo, formaPagamentoSelecionada);
+
+            if (impresso) {
+                AlertUtil.exibirSucesso("Ingresso enviado para a impressora com sucesso!");
+            } else {
+                boolean salvarPdf = AlertUtil.confirmar("Impressora indisponível",
+                        "Não foi possível enviar para a impressora local.\n" +
+                        "Deseja salvar o comprovante como PDF?");
+                if (salvarPdf) {
+                    abrirComprovantePdf();
+                }
+            }
+        } catch (Exception e) {
+            AlertUtil.exibirErro("Erro ao imprimir ingresso: " + e.getMessage());
+        }
     }
 
     @FXML
@@ -478,7 +496,8 @@ public class VendaController implements Initializable {
         File file = fileChooser.showSaveDialog(btnPayCartao.getScene().getWindow());
         if (file != null) {
             try {
-                ingressoService.salvarComprovantePDF(vendaConcluida.getIngressos().get(0).getCodigo(), file.toPath());
+                UUID codigo = vendaConcluida.getIngressos().get(0).getCodigo();
+                ingressoService.salvarComprovantePDF(codigo, formaPagamentoSelecionada, file.toPath());
                 AlertUtil.exibirSucesso("Comprovante salvo com sucesso em: " + file.getAbsolutePath());
             } catch (Exception e) {
                 AlertUtil.exibirErro("Erro ao salvar PDF: " + e.getMessage());

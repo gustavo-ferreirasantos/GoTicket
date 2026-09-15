@@ -4,9 +4,12 @@ import com.eventgo.config.DatabaseConfig;
 import com.eventgo.dao.IngressoDAO;
 import com.eventgo.dao.LoteDAO;
 import com.eventgo.model.Ingresso;
+import com.eventgo.model.enums.FormaPagamento;
 import com.eventgo.model.enums.StatusIngresso;
 import com.eventgo.util.ValidacaoUtil;
 
+import javax.print.*;
+import java.io.ByteArrayInputStream;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -88,17 +91,41 @@ public class IngressoService {
         ingressoDAO.registrarCheckin(codigo);
     }
 
-    public byte[] emitirComprovantePDF(UUID codigo) throws Exception {
+    public byte[] emitirComprovantePDF(UUID codigo, FormaPagamento formaPagamento) throws Exception {
         Ingresso ingresso = ingressoDAO.buscarPorCodigo(codigo)
                 .orElseThrow(() -> new IllegalArgumentException("Ingresso não encontrado para emissão."));
 
-        return ComprovantePDFService.gerarComprovantePDF(ingresso);
+        return ComprovantePDFService.gerarComprovantePDF(ingresso, formaPagamento);
     }
 
-    public void salvarComprovantePDF(UUID codigo, Path caminhoDestino) throws Exception {
+    public void salvarComprovantePDF(UUID codigo, FormaPagamento formaPagamento, Path caminhoDestino) throws Exception {
         Ingresso ingresso = ingressoDAO.buscarPorCodigo(codigo)
                 .orElseThrow(() -> new IllegalArgumentException("Ingresso não encontrado para emissão."));
 
-        ComprovantePDFService.salvarComprovanteEmArquivo(ingresso, caminhoDestino);
+        ComprovantePDFService.salvarComprovanteEmArquivo(ingresso, formaPagamento, caminhoDestino);
+    }
+
+    /**
+     * Tenta enviar o ingresso para a impressora local (spooler).
+     * Em caso de falha, retorna false para que o chamador ofereça salvar como PDF.
+     */
+    public boolean imprimirIngressoLocal(UUID codigo, FormaPagamento formaPagamento) throws Exception {
+        byte[] pdfBytes = emitirComprovantePDF(codigo, formaPagamento);
+
+        try {
+            DocFlavor flavor = DocFlavor.INPUT_STREAM.PDF;
+            Doc doc = new SimpleDoc(new ByteArrayInputStream(pdfBytes), flavor, null);
+            PrintService printService = PrintServiceLookup.lookupDefaultPrintService();
+
+            if (printService == null) {
+                throw new IllegalStateException("Nenhuma impressora encontrada no sistema.");
+            }
+
+            DocPrintJob printJob = printService.createPrintJob();
+            printJob.print(doc, null);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

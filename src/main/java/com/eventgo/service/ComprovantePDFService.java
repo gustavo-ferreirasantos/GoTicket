@@ -1,6 +1,7 @@
 package com.eventgo.service;
 
 import com.eventgo.model.Ingresso;
+import com.eventgo.model.enums.FormaPagamento;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
@@ -21,19 +22,19 @@ public class ComprovantePDFService {
     private static final NumberFormat MOEDA = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
     private static final DateTimeFormatter DATA_HORA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
-    public static byte[] gerarComprovantePDF(Ingresso ingresso) throws Exception {
+    public static byte[] gerarComprovantePDF(Ingresso ingresso, FormaPagamento formaPagamento) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        gerarDocumento(ingresso, baos);
+        gerarDocumento(ingresso, formaPagamento, baos);
         return baos.toByteArray();
     }
 
-    public static void salvarComprovanteEmArquivo(Ingresso ingresso, Path caminhoDestino) throws Exception {
+    public static void salvarComprovanteEmArquivo(Ingresso ingresso, FormaPagamento formaPagamento, Path caminhoDestino) throws Exception {
         try (FileOutputStream fos = new FileOutputStream(caminhoDestino.toFile())) {
-            gerarDocumento(ingresso, fos);
+            gerarDocumento(ingresso, formaPagamento, fos);
         }
     }
 
-    private static void gerarDocumento(Ingresso ingresso, OutputStream out) throws Exception {
+    private static void gerarDocumento(Ingresso ingresso, FormaPagamento formaPagamento, OutputStream out) throws Exception {
         Document document = new Document(PageSize.A6, 20, 20, 20, 20); // Tamanho compacto para ingresso
         PdfWriter.getInstance(document, out);
         document.open();
@@ -67,6 +68,7 @@ public class ComprovantePDFService {
         adicionarLinha(table, "Setor:", ingresso.getNomeSetor(), fontSubtitulo, fontNormal);
         adicionarLinha(table, "Tipo:", ingresso.getNomeTipoIngresso(), fontSubtitulo, fontNormal);
         adicionarLinha(table, "Valor Pago:", MOEDA.format(ingresso.getPrecoPago()), fontSubtitulo, fontDestaque);
+        adicionarLinha(table, "Pagamento:", formaPagamento != null ? formaPagamento.getDescricao() : "-", fontSubtitulo, fontNormal);
 
         if (ingresso.getNomeParticipante() != null && !ingresso.getNomeParticipante().isBlank()) {
             adicionarLinha(table, "Participante:", ingresso.getNomeParticipante(), fontSubtitulo, fontNormal);
