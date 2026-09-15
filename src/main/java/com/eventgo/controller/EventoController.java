@@ -297,7 +297,7 @@ public class EventoController implements Initializable {
                     return;
                 }
             } catch (NumberFormatException nfe) {
-                AlertUtil.exibirAviso("Capacidade inválida. Digite apenas números.");
+                AlertUtil.exibirAviso("Capacidade inválida. Digite apenas números ou um valor menor.");
                 txtEventoCapacidade.requestFocus();
                 return;
             }
@@ -413,7 +413,7 @@ public class EventoController implements Initializable {
                     return;
                 }
             } catch (NumberFormatException nfe) {
-                AlertUtil.exibirAviso("Capacidade do setor inválida. Digite apenas números.");
+                AlertUtil.exibirAviso("Capacidade do setor inválida. Digite apenas números ou um valor menor.");
                 txtNovoSetorCapacidade.requestFocus();
                 return;
             }
@@ -443,7 +443,7 @@ public class EventoController implements Initializable {
 
             String qtdStr = txtNovoSetorQuantidade.getText() != null ? txtNovoSetorQuantidade.getText().trim() : "";
             if (qtdStr.isEmpty()) {
-                AlertUtil.exibirAviso("A quantidade total do lote é obrigatória.");
+                AlertUtil.exibirAviso("A quantidade de ingressos do lote é obrigatória.");
                 txtNovoSetorQuantidade.requestFocus();
                 return;
             }
@@ -457,7 +457,7 @@ public class EventoController implements Initializable {
                     return;
                 }
             } catch (NumberFormatException nfe) {
-                AlertUtil.exibirAviso("Quantidade inválida. Digite apenas números.");
+                AlertUtil.exibirAviso("Quantidade inválida. Digite apenas números ou um valor menor.");
                 txtNovoSetorQuantidade.requestFocus();
                 return;
             }
