@@ -77,4 +77,22 @@ public class EventoServiceTest {
 
         assertThrows(IllegalStateException.class, () -> eventoService.atualizar(dto));
     }
+
+    @Test
+    @DisplayName("Deve chamar eventoDAO.listarAbertosParaVenda ao listar eventos com estoque")
+    void deveListarAbertosParaVenda() throws SQLException {
+        Evento evento = new Evento();
+        evento.setId(1L);
+        evento.setNome("Festival de Inverno");
+        evento.setSituacao(SituacaoEvento.ABERTO);
+
+        when(eventoDAO.listarAbertosParaVenda()).thenReturn(java.util.List.of(evento));
+
+        java.util.List<Evento> resultado = eventoService.listarAbertosParaVenda();
+
+        assertNotNull(resultado);
+        assertEquals(1, resultado.size());
+        assertEquals("Festival de Inverno", resultado.get(0).getNome());
+        verify(eventoDAO, times(1)).listarAbertosParaVenda();
+    }
 }

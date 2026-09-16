@@ -162,7 +162,7 @@ public class VendaController implements Initializable {
                 aoSelecionarEvento();
             } else {
                 cbEventos.setValue(null);
-                lblDisponibilidade.setText("Nenhum evento aberto.");
+                lblDisponibilidade.setText("Nenhum evento com ingressos disponíveis no estoque.");
             }
         } catch (SQLException e) {
             AlertUtil.exibirErro("Erro ao carregar eventos: " + e.getMessage());

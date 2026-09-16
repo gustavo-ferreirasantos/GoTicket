@@ -133,9 +133,30 @@ public class EventoDAO {
     }
 
     public List<Evento> listarAbertosParaVenda() throws SQLException {
-        FiltroEventoDTO filtro = new FiltroEventoDTO();
-        filtro.setSituacao(SituacaoEvento.ABERTO);
-        return listar(filtro);
+        List<Evento> lista = new ArrayList<>();
+        String sql = "SELECT e.id, e.nome, e.descricao, e.data_evento, e.horario, e.local, e.capacidade_total, e.situacao, e.criado_em, e.atualizado_em " +
+                     "FROM eventgo.evento e " +
+                     "WHERE e.situacao = 'ABERTO' " +
+                     "AND EXISTS (" +
+                     "    SELECT 1 FROM eventgo.setor s " +
+                     "    JOIN eventgo.tipo_ingresso ti ON ti.setor_id = s.id " +
+                     "    JOIN eventgo.lote l ON l.tipo_ingresso_id = ti.id " +
+                     "    WHERE s.evento_id = e.id " +
+                     "      AND l.ativo = true " +
+                     "      AND l.quantidade_disponivel > 0 " +
+                     "      AND (l.data_fim >= CURRENT_DATE OR l.data_fim IS NULL)" +
+                     ") " +
+                     "ORDER BY e.data_evento ASC, e.horario ASC";
+
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                lista.add(mapearEvento(rs));
+            }
+        }
+        return lista;
     }
 
     private Evento mapearEvento(ResultSet rs) throws SQLException {
