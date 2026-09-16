@@ -44,6 +44,12 @@ public class VendaService {
     public Venda registrarVenda(VendaDTO dto) throws SQLException {
         validarVendaDTO(dto);
 
+        for (ItemVendaDTO item : dto.getItens()) {
+            if (item.getQuantidade() != 1) {
+                throw new IllegalArgumentException("Apenas 1 ingresso por transação é permitido.");
+            }
+        }
+
         // RN-03: Evento deve estar com situação ABERTO
         Evento evento = eventoDAO.buscarPorId(dto.getEventoId())
                 .orElseThrow(() -> new IllegalArgumentException("Evento não encontrado."));

@@ -39,16 +39,8 @@
                 </VBox>
             </HBox>
 
-            <!-- Quantity Section -->
-            <VBox spacing="8">
-                <Label text="Quantidade" styleClass="field-label"/>
-                <HBox spacing="12" alignment="CENTER_LEFT">
-                    <Button text="-" styleClass="btn-secondary" prefWidth="38.0" prefHeight="38.0" onAction="#diminuirQuantidade"/>
-                    <TextField fx:id="txtQuantidade" text="1" prefWidth="54.0" prefHeight="38.0" alignment="CENTER"/>
-                    <Button text="+" styleClass="btn-secondary" prefWidth="38.0" prefHeight="38.0" onAction="#aumentarQuantidade"/>
-                    <Label fx:id="lblDisponibilidade" text="0 ingressos disponíveis" styleClass="subtitle-light"/>
-                </HBox>
-            </VBox>
+            <!-- Disponibilidade -->
+            <Label fx:id="lblDisponibilidade" text="0 ingressos disponíveis" styleClass="subtitle-light"/>
 
             <!-- Summary Panel -->
             <VBox styleClass="summary-panel" spacing="12">

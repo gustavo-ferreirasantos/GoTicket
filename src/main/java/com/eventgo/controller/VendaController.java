@@ -45,7 +45,6 @@ public class VendaController implements Initializable {
     @FXML private ComboBox<Evento> cbEventos;
     @FXML private ComboBox<Setor> cbSetores;
     @FXML private ComboBox<TipoIngresso> cbTiposIngresso;
-    @FXML private TextField txtQuantidade;
     @FXML private Label lblDisponibilidade;
     @FXML private Label lblItemResumo;
     @FXML private Label lblSubtotalResumo;
@@ -82,7 +81,6 @@ public class VendaController implements Initializable {
     private final IngressoService ingressoService;
 
     private Lote loteAtivo;
-    private int quantidadeSelecionada = 1;
     private FormaPagamento formaPagamentoSelecionada = FormaPagamento.CARTAO_CREDITO;
     private Venda vendaConcluida;
 
@@ -230,24 +228,6 @@ public class VendaController implements Initializable {
     }
 
     @FXML
-    public void aumentarQuantidade() {
-        if (loteAtivo != null && quantidadeSelecionada < loteAtivo.getQuantidadeDisponivel()) {
-            quantidadeSelecionada++;
-            txtQuantidade.setText(String.valueOf(quantidadeSelecionada));
-            atualizarResumoStep1();
-        }
-    }
-
-    @FXML
-    public void diminuirQuantidade() {
-        if (quantidadeSelecionada > 1) {
-            quantidadeSelecionada--;
-            txtQuantidade.setText(String.valueOf(quantidadeSelecionada));
-            atualizarResumoStep1();
-        }
-    }
-
-    @FXML
     public void selecionarCartao() {
         formaPagamentoSelecionada = FormaPagamento.CARTAO_CREDITO;
         atualizarBotoesPagamento();
@@ -282,8 +262,8 @@ public class VendaController implements Initializable {
 
     private void atualizarResumoStep1() {
         if (loteAtivo != null && cbSetores.getValue() != null && cbTiposIngresso.getValue() != null) {
-            BigDecimal subtotal = loteAtivo.getPreco().multiply(BigDecimal.valueOf(quantidadeSelecionada));
-            String descItem = quantidadeSelecionada + "x " + cbSetores.getValue().getNome() + " (" + cbTiposIngresso.getValue().getNome() + ")";
+            BigDecimal subtotal = loteAtivo.getPreco();
+            String descItem = "1x " + cbSetores.getValue().getNome() + " (" + cbTiposIngresso.getValue().getNome() + ")";
             lblItemResumo.setText(descItem + " — " + moedaFormat.format(loteAtivo.getPreco()));
             lblSubtotalResumo.setText(moedaFormat.format(subtotal));
             lblTotalResumo.setText(moedaFormat.format(subtotal));
@@ -419,7 +399,7 @@ public class VendaController implements Initializable {
             ItemVendaDTO item = new ItemVendaDTO();
             item.setLoteId(loteAtivo.getId());
             item.setParticipanteId(participante.getId());
-            item.setQuantidade(quantidadeSelecionada);
+            item.setQuantidade(1);
             item.setPrecoUnitario(loteAtivo.getPreco());
 
             Long usuarioId = SessaoUsuario.getInstancia().getUsuarioLogado() != null
@@ -510,8 +490,6 @@ public class VendaController implements Initializable {
 
     @FXML
     public void reiniciarFluxoVenda() {
-        quantidadeSelecionada = 1;
-        txtQuantidade.setText("1");
         txtCpfParticipante.clear();
         txtNomeParticipante.clear();
         txtEmailParticipante.clear();
