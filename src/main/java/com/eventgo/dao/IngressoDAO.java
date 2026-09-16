@@ -125,7 +125,7 @@ public class IngressoDAO {
 
     public void cancelar(Connection conn, UUID codigo, Long usuarioId, String motivo) throws SQLException {
         String sql = "UPDATE eventgo.ingresso SET status = 'CANCELADO', cancelado_por = ?, " +
-                     "motivo_cancelamento = ?, data_cancelamento = NOW() WHERE codigo = ? AND status = 'ATIVO'";
+                     "motivo_cancelamento = ?, data_cancelamento = NOW() WHERE codigo = ? AND status IN ('ATIVO','EMITIDO')";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, usuarioId);

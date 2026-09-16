@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.eventgo.controller.CancelamentoController"
+           style="-fx-background-color: #FFFFFF;">
+
+    <VBox spacing="24" VBox.vgrow="ALWAYS" style="-fx-background-color: #FFFFFF;">
+
+        <!-- Header -->
+        <Label text="Cancelar Ingresso" styleClass="title-section"/>
+
+        <!-- Search Row -->
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Código do Ingresso (UUID)" styleClass="field-label"/>
+                <TextField fx:id="txtCodigo" promptText="Ex: 550e8400-e29b-41d4-a716-446655440000"
+                           prefWidth="420.0" maxWidth="420.0"/>
+            </VBox>
+            <VBox spacing="4">
+                <Label text=" " styleClass="field-label"/>
+                <Button fx:id="btnConsultar" text="Consultar" styleClass="btn-primary"
+                        onAction="#consultarIngresso"/>
+            </VBox>
+        </HBox>
+
+        <!-- Ticket Details (initially hidden) -->
+        <VBox fx:id="detalhesPane" visible="false" spacing="16" maxWidth="560.0">
+            <VBox styleClass="card-white" spacing="12" style="-fx-padding: 16;">
+                <Label fx:id="lblEventoNome" text="" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1F2937;"/>
+                <Label fx:id="lblEventoDetalhes" text="" styleClass="subtitle-light"/>
+
+                <Separator/>
+
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <Label text="Participante" styleClass="subtitle-light" prefWidth="120"/>
+                    <Label fx:id="lblParticipante" text="" styleClass="field-label"/>
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <Label text="CPF" styleClass="subtitle-light" prefWidth="120"/>
+                    <Label fx:id="lblCpf" text="" styleClass="field-label"/>
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <Label text="Setor" styleClass="subtitle-light" prefWidth="120"/>
+                    <Label fx:id="lblSetor" text="" styleClass="field-label"/>
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <Label text="Tipo" styleClass="subtitle-light" prefWidth="120"/>
+                    <Label fx:id="lblTipoIngresso" text="" styleClass="field-label"/>
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <Label text="Preço" styleClass="subtitle-light" prefWidth="120"/>
+                    <Label fx:id="lblPreco" text="" styleClass="field-label"/>
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <Label text="Status" styleClass="subtitle-light" prefWidth="120"/>
+                    <Label fx:id="lblStatus" text="" styleClass="badge-ativo"/>
+                </HBox>
+            </VBox>
+
+            <!-- Motivo do Cancelamento -->
+            <VBox spacing="6">
+                <Label text="Motivo do Cancelamento *" styleClass="field-label"/>
+                <TextArea fx:id="txtMotivo" promptText="Informe o motivo do cancelamento..."
+                          prefRowCount="3" wrapText="true" prefWidth="560.0" maxWidth="560.0"
+                          styleClass="text-area"/>
+            </VBox>
+
+            <!-- Action Buttons -->
+            <HBox spacing="12">
+                <Button fx:id="btnCancelar" text="Cancelar Ingresso" styleClass="btn-primary"
+                        onAction="#cancelarIngresso"/>
+                <Button fx:id="btnLimpar" text="Limpar" styleClass="btn-secondary"
+                        onAction="#limparFormulario"/>
+            </HBox>
+        </VBox>
+
+    </VBox>
+</StackPane>

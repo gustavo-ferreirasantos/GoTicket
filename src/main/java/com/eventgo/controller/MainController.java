@@ -72,7 +72,7 @@ public class MainController implements Initializable {
     @FXML
     public void navCancelamento() {
         destacarBotao(btnNavCancelamento);
-        NavigationUtil.carregarView("placeholder.fxml");
+        NavigationUtil.carregarView("cancelamento.fxml");
     }
 
     @FXML

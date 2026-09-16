@@ -369,6 +369,16 @@
     -fx-alignment: CENTER;
 }
 
+.badge-cancelado {
+    -fx-background-color: #FDECEA;
+    -fx-text-fill: #DC2626;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-background-radius: 4px;
+    -fx-padding: 4px 10px;
+    -fx-alignment: CENTER;
+}
+
 /* ============================================================
    STEPPER INDICATOR (FIGMA: Frame06 / Frame07)
    ============================================================ */
