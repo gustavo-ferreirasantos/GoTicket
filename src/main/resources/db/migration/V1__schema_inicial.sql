@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS ingresso (
     participante_id       BIGINT          REFERENCES participante(id),
     preco_pago            DECIMAL(10,2)   NOT NULL CHECK (preco_pago >= 0),
     status                VARCHAR(20)     NOT NULL DEFAULT 'ATIVO'
-                                          CHECK (status IN ('ATIVO', 'UTILIZADO', 'CANCELADO')),
+                                          CHECK (status IN ('ATIVO', 'EMITIDO', 'UTILIZADO', 'CANCELADO')),
     data_checkin          TIMESTAMP,
     motivo_cancelamento   VARCHAR(255),
     cancelado_por         BIGINT          REFERENCES usuario(id),
