@@ -426,6 +426,16 @@ public class EventoController implements Initializable {
                 return;
             }
 
+            int capacidadeUsada = setorService.listarPorEvento(eventoSelecionado.getId()).stream()
+                    .mapToInt(Setor::getCapacidade)
+                    .sum();
+            int capacidadeRestante = (eventoSelecionado.getCapacidadeTotal() != null ? eventoSelecionado.getCapacidadeTotal() : 0) - capacidadeUsada;
+            if (capacidade > capacidadeRestante) {
+                AlertUtil.exibirAviso("A capacidade do setor (" + capacidade + ") excede a capacidade restante do evento (" + capacidadeRestante + ").");
+                txtNovoSetorCapacidade.requestFocus();
+                return;
+            }
+
             CategoriaIngresso categoria = cbNovoSetorTipo.getValue() != null ? cbNovoSetorTipo.getValue() : CategoriaIngresso.INTEIRA;
             
             String precoStr = txtNovoSetorPreco.getText() != null ? txtNovoSetorPreco.getText().replace("R$", "").replace(",", ".").trim() : "";
