@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.eventgo.controller.RelatorioController"
+           style="-fx-background-color: #FFFFFF;">
+
+    <VBox spacing="24" VBox.vgrow="ALWAYS" style="-fx-background-color: #FFFFFF;">
+
+        <!-- Header -->
+        <Label text="Relatórios de Vendas" styleClass="title-section"/>
+
+        <!-- Filters -->
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <VBox spacing="4">
+                <Label text="Evento" styleClass="field-label"/>
+                <ComboBox fx:id="cbEvento" prefWidth="220.0"/>
+            </VBox>
+            <VBox spacing="4">
+                <Label text="Status" styleClass="field-label"/>
+                <ComboBox fx:id="cbStatus" prefWidth="160.0"/>
+            </VBox>
+            <VBox spacing="4">
+                <Label text="Pagamento" styleClass="field-label"/>
+                <ComboBox fx:id="cbPagamento" prefWidth="180.0"/>
+            </VBox>
+            <VBox spacing="4">
+                <Label text=" " styleClass="field-label"/>
+                <HBox spacing="8">
+                    <Button text="Filtrar" styleClass="btn-primary" onAction="#aplicarFiltro"/>
+                    <Button text="Limpar" styleClass="btn-secondary" onAction="#limparFiltro"/>
+                </HBox>
+            </VBox>
+        </HBox>
+
+        <!-- Summary -->
+        <HBox spacing="24" styleClass="summary-panel">
+            <padding><Insets top="12" right="16" bottom="12" left="16"/></padding>
+            <Label fx:id="lblTotalVendas" text="Vendas: 0"/>
+            <Label fx:id="lblTotalReceita" text="Receita: R$ 0,00"/>
+        </HBox>
+
+        <!-- Table -->
+        <TableView fx:id="tabelaVendas" VBox.vgrow="ALWAYS" fixedCellSize="40">
+            <columns>
+                <TableColumn fx:id="colVendaId" text="#" prefWidth="50"/>
+                <TableColumn fx:id="colEvento" text="Evento" prefWidth="200"/>
+                <TableColumn fx:id="colDataVenda" text="Data da Venda" prefWidth="150"/>
+                <TableColumn fx:id="colPagamento" text="Pagamento" prefWidth="130"/>
+                <TableColumn fx:id="colQtdIngressos" text="Ingressos" prefWidth="80"/>
+                <TableColumn fx:id="colValorTotal" text="Valor Total" prefWidth="110"/>
+                <TableColumn fx:id="colStatus" text="Status" prefWidth="120"/>
+                <TableColumn fx:id="colAcoes" text="" prefWidth="120" maxWidth="120"/>
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+        </TableView>
+
+    </VBox>
+
+</StackPane>

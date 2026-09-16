@@ -84,7 +84,7 @@ public class MainController implements Initializable {
     @FXML
     public void navRelatorios() {
         destacarBotao(btnNavRelatorios);
-        NavigationUtil.carregarView("placeholder.fxml");
+        NavigationUtil.carregarView("relatorio.fxml");
     }
 
     @FXML

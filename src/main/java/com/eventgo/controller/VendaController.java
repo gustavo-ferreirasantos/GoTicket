@@ -472,12 +472,13 @@ public class VendaController implements Initializable {
             if (impresso) {
                 AlertUtil.exibirSucesso("Ingresso enviado para a impressora com sucesso!");
             } else {
-                boolean salvarPdf = AlertUtil.confirmar("Impressora indisponível",
-                        "Não foi possível enviar para a impressora local.\n" +
-                        "Deseja salvar o comprovante como PDF?");
-                if (salvarPdf) {
-                    abrirComprovantePdf();
-                }
+                AlertUtil.exibirAviso("Nenhuma impressora detectada no sistema.");
+            }
+
+            boolean salvarPdf = AlertUtil.confirmar("Salvar cópia em PDF",
+                    "Deseja salvar uma cópia do comprovante como arquivo PDF?");
+            if (salvarPdf) {
+                abrirComprovantePdf();
             }
         } catch (Exception e) {
             AlertUtil.exibirErro("Erro ao imprimir ingresso: " + e.getMessage());
