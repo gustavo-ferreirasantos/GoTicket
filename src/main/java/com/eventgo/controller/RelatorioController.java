@@ -47,6 +47,7 @@ public class RelatorioController implements Initializable {
 
     private final RelatorioService relatorioService;
     private final EventoService eventoService;
+    private final IngressoService ingressoService;
 
     private final NumberFormat moedaFormat = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -54,6 +55,7 @@ public class RelatorioController implements Initializable {
     public RelatorioController() {
         this.relatorioService = new RelatorioService();
         this.eventoService = new EventoService();
+        this.ingressoService = new IngressoService();
     }
 
     @Override
@@ -267,6 +269,8 @@ public class RelatorioController implements Initializable {
                 } else {
                     AlertUtil.exibirAviso("Nenhuma impressora detectada no sistema.");
                 }
+
+                ingressoService.marcarComoEmitido(venda.getPrimeiroIngressoCodigo());
                 perguntarSalvarPdf(venda);
             } catch (Exception e) {
                 AlertUtil.exibirErro("Erro ao imprimir: " + e.getMessage());

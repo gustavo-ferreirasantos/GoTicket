@@ -2,6 +2,7 @@ package com.eventgo.model.enums;
 
 public enum StatusIngresso {
     ATIVO("Ativo"),
+    EMITIDO("Emitido / Não Utilizado"),
     UTILIZADO("Utilizado / Entrou"),
     CANCELADO("Cancelado");
 

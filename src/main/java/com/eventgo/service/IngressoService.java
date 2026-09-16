@@ -91,6 +91,11 @@ public class IngressoService {
         ingressoDAO.registrarCheckin(codigo);
     }
 
+    public void marcarComoEmitido(UUID codigo) throws SQLException {
+        if (codigo == null) throw new IllegalArgumentException("Código do ingresso é obrigatório.");
+        ingressoDAO.marcarComoEmitido(codigo);
+    }
+
     public byte[] emitirComprovantePDF(UUID codigo, FormaPagamento formaPagamento) throws Exception {
         Ingresso ingresso = ingressoDAO.buscarPorCodigo(codigo)
                 .orElseThrow(() -> new IllegalArgumentException("Ingresso não encontrado para emissão."));

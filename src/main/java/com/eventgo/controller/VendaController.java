@@ -475,6 +475,8 @@ public class VendaController implements Initializable {
                 AlertUtil.exibirAviso("Nenhuma impressora detectada no sistema.");
             }
 
+            ingressoService.marcarComoEmitido(codigo);
+
             boolean salvarPdf = AlertUtil.confirmar("Salvar cópia em PDF",
                     "Deseja salvar uma cópia do comprovante como arquivo PDF?");
             if (salvarPdf) {
