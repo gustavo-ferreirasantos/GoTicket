@@ -16,13 +16,13 @@
         <!-- Search Row -->
         <HBox spacing="12" alignment="CENTER_LEFT">
             <VBox spacing="4" HBox.hgrow="ALWAYS">
-                <Label text="Código do Ingresso (UUID)" styleClass="field-label"/>
+                <Label text="Identificador do Ingresso (UUID)" styleClass="field-label"/>
                 <TextField fx:id="txtCodigo" promptText="Ex: 550e8400-e29b-41d4-a716-446655440000"
                            prefWidth="420.0" maxWidth="420.0"/>
             </VBox>
             <VBox spacing="4">
                 <Label text=" " styleClass="field-label"/>
-                <Button fx:id="btnConsultar" text="Consultar" styleClass="btn-primary"
+                <Button fx:id="btnConsultar" text="Buscar" styleClass="btn-primary"
                         onAction="#consultarIngresso"/>
             </VBox>
         </HBox>
@@ -30,39 +30,35 @@
         <!-- Ticket Details (initially hidden) -->
         <VBox fx:id="detalhesPane" visible="false" spacing="16" maxWidth="560.0">
             <VBox styleClass="card-white" spacing="12" style="-fx-padding: 16;">
-                <Label fx:id="lblEventoNome" text="" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1F2937;"/>
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <Label fx:id="lblEventoNome" text="" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1F2937;" HBox.hgrow="ALWAYS"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="lblStatus" text="" styleClass="badge-ativo"/>
+                </HBox>
                 <Label fx:id="lblEventoDetalhes" text="" styleClass="subtitle-light"/>
 
                 <Separator/>
 
-                <HBox alignment="CENTER_LEFT" spacing="8">
-                    <Label text="Participante" styleClass="subtitle-light" prefWidth="120"/>
-                    <Label fx:id="lblParticipante" text="" styleClass="field-label"/>
+                <HBox spacing="24">
+                    <VBox spacing="4" HBox.hgrow="ALWAYS">
+                        <Label text="Participante" styleClass="subtitle-light"/>
+                        <Label fx:id="lblParticipante" text="" styleClass="field-label"/>
+                    </VBox>
+                    <VBox spacing="4" HBox.hgrow="ALWAYS">
+                        <Label text="CPF" styleClass="subtitle-light"/>
+                        <Label fx:id="lblCpf" text="" styleClass="field-label"/>
+                    </VBox>
                 </HBox>
 
-                <HBox alignment="CENTER_LEFT" spacing="8">
-                    <Label text="CPF" styleClass="subtitle-light" prefWidth="120"/>
-                    <Label fx:id="lblCpf" text="" styleClass="field-label"/>
-                </HBox>
-
-                <HBox alignment="CENTER_LEFT" spacing="8">
-                    <Label text="Setor" styleClass="subtitle-light" prefWidth="120"/>
-                    <Label fx:id="lblSetor" text="" styleClass="field-label"/>
-                </HBox>
-
-                <HBox alignment="CENTER_LEFT" spacing="8">
-                    <Label text="Tipo" styleClass="subtitle-light" prefWidth="120"/>
-                    <Label fx:id="lblTipoIngresso" text="" styleClass="field-label"/>
-                </HBox>
-
-                <HBox alignment="CENTER_LEFT" spacing="8">
-                    <Label text="Preço" styleClass="subtitle-light" prefWidth="120"/>
-                    <Label fx:id="lblPreco" text="" styleClass="field-label"/>
-                </HBox>
-
-                <HBox alignment="CENTER_LEFT" spacing="8">
-                    <Label text="Status" styleClass="subtitle-light" prefWidth="120"/>
-                    <Label fx:id="lblStatus" text="" styleClass="badge-ativo"/>
+                <HBox spacing="24">
+                    <VBox spacing="4" HBox.hgrow="ALWAYS">
+                        <Label text="Identificador" styleClass="subtitle-light"/>
+                        <Label fx:id="lblIdentificador" text="" styleClass="field-label" wrapText="true"/>
+                    </VBox>
+                    <VBox spacing="4" HBox.hgrow="ALWAYS">
+                        <Label text="Valor pago" styleClass="subtitle-light"/>
+                        <Label fx:id="lblPreco" text="" styleClass="field-label"/>
+                    </VBox>
                 </HBox>
             </VBox>
 
@@ -74,12 +70,16 @@
                           styleClass="text-area"/>
             </VBox>
 
+            <!-- Warning Banner -->
+            <Label fx:id="lblAvisoCancelamento" styleClass="danger-banner" maxWidth="560.0"
+                   text="⚠ Esta ação não pode ser desfeita. O ingresso será devolvido ao estoque do setor."/>
+
             <!-- Action Buttons -->
             <HBox spacing="12">
-                <Button fx:id="btnCancelar" text="Cancelar Ingresso" styleClass="btn-primary"
-                        onAction="#cancelarIngresso"/>
-                <Button fx:id="btnLimpar" text="Limpar" styleClass="btn-secondary"
+                <Button fx:id="btnLimpar" text="Voltar" styleClass="btn-secondary"
                         onAction="#limparFormulario"/>
+                <Button fx:id="btnCancelar" text="Confirmar Cancelamento" styleClass="btn-danger"
+                        onAction="#cancelarIngresso"/>
             </HBox>
         </VBox>
 

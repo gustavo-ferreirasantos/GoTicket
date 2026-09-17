@@ -28,11 +28,11 @@ public class CancelamentoController implements Initializable {
     @FXML private Label lblEventoDetalhes;
     @FXML private Label lblParticipante;
     @FXML private Label lblCpf;
-    @FXML private Label lblSetor;
-    @FXML private Label lblTipoIngresso;
+    @FXML private Label lblIdentificador;
     @FXML private Label lblPreco;
     @FXML private Label lblStatus;
     @FXML private TextArea txtMotivo;
+    @FXML private Label lblAvisoCancelamento;
     @FXML private Button btnCancelar;
     @FXML private Button btnLimpar;
 
@@ -84,13 +84,12 @@ public class CancelamentoController implements Initializable {
         lblEventoNome.setText(i.getNomeEvento() != null ? i.getNomeEvento() : "—");
         lblEventoDetalhes.setText(String.format("%s · %s · %s",
                 i.getDataEventoFormatada() != null ? i.getDataEventoFormatada() : "—",
-                i.getLocalEvento() != null ? i.getLocalEvento() : "—",
-                i.getNomeSetor() != null ? i.getNomeSetor() : "—"));
+                i.getNomeSetor() != null ? i.getNomeSetor() : "—",
+                i.getNomeTipoIngresso() != null ? i.getNomeTipoIngresso() : "—"));
 
         lblParticipante.setText(i.getNomeParticipante() != null ? i.getNomeParticipante() : "—");
         lblCpf.setText(i.getCpfParticipante() != null ? i.getCpfParticipante() : "—");
-        lblSetor.setText(i.getNomeSetor() != null ? i.getNomeSetor() : "—");
-        lblTipoIngresso.setText(i.getNomeTipoIngresso() != null ? i.getNomeTipoIngresso() : "—");
+        lblIdentificador.setText(i.getCodigo() != null ? i.getCodigo().toString() : "—");
         lblPreco.setText(i.getPrecoPago() != null
                 ? "R$ " + i.getPrecoPago().toPlainString().replace(".", ",")
                 : "R$ 0,00");
@@ -110,6 +109,8 @@ public class CancelamentoController implements Initializable {
         btnCancelar.setVisible(podeCancelar);
         btnCancelar.setManaged(podeCancelar);
         txtMotivo.setDisable(!podeCancelar);
+        lblAvisoCancelamento.setVisible(podeCancelar);
+        lblAvisoCancelamento.setManaged(podeCancelar);
 
         detalhesPane.setVisible(true);
         detalhesPane.setManaged(true);
@@ -136,13 +137,6 @@ public class CancelamentoController implements Initializable {
             AlertUtil.exibirAviso("O motivo do cancelamento é obrigatório.");
             return;
         }
-
-        boolean confirmado = AlertUtil.confirmar("Cancelar Ingresso",
-                "Tem certeza que deseja cancelar este ingresso?\n\n" +
-                "Evento: " + lblEventoNome.getText() + "\n" +
-                "Participante: " + lblParticipante.getText() + "\n\n" +
-                "Esta ação não pode ser desfeita.");
-        if (!confirmado) return;
 
         try {
             Long usuarioId = SessaoUsuario.getInstancia().getUsuarioLogado().getId();
