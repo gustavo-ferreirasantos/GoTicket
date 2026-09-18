@@ -96,7 +96,7 @@ public class DashboardController implements Initializable {
 
     @FXML
     public void atalhoRelatorios() {
-        NavigationUtil.carregarView("placeholder.fxml");
+        NavigationUtil.carregarView("relatorio.fxml");
     }
 
     @FXML
