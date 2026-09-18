@@ -70,6 +70,7 @@ public class VendaController implements Initializable {
     @FXML private Label lblComprovanteParticipante;
     @FXML private Label lblComprovanteSetor;
     @FXML private Label lblComprovanteIdentificador;
+    @FXML private Label lblComprovanteStatus;
 
     // Services
     private final EventoService eventoService;
@@ -443,6 +444,9 @@ public class VendaController implements Initializable {
                 lblComprovanteIdentificador.setText("GT-2026-" + String.format("%06d", vendaConcluida.getId()));
             }
 
+            lblComprovanteStatus.setText("Ativo");
+            lblComprovanteStatus.getStyleClass().setAll("badge-ativo");
+
             mostrarStep(4);
 
         } catch (Exception e) {
@@ -468,6 +472,8 @@ public class VendaController implements Initializable {
             }
 
             ingressoService.marcarComoEmitido(codigo);
+            lblComprovanteStatus.setText("Emitido / Não Utilizado");
+            lblComprovanteStatus.getStyleClass().setAll("badge-ativo");
 
             boolean salvarPdf = AlertUtil.confirmar("Salvar cópia em PDF",
                     "Deseja salvar uma cópia do comprovante como arquivo PDF?");
@@ -493,6 +499,9 @@ public class VendaController implements Initializable {
             try {
                 UUID codigo = vendaConcluida.getIngressos().get(0).getCodigo();
                 ingressoService.salvarComprovantePDF(codigo, formaPagamentoSelecionada, file.toPath());
+                ingressoService.marcarComoEmitido(codigo);
+                lblComprovanteStatus.setText("Emitido / Não Utilizado");
+                lblComprovanteStatus.getStyleClass().setAll("badge-ativo");
                 AlertUtil.exibirSucesso("Comprovante salvo com sucesso em: " + file.getAbsolutePath());
             } catch (Exception e) {
                 AlertUtil.exibirErro("Erro ao salvar PDF: " + e.getMessage());

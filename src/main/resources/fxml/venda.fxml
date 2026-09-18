@@ -161,7 +161,7 @@
 
                 <HBox alignment="CENTER_LEFT">
                     <Label text="Status" styleClass="subtitle-light" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
-                    <Label text="Emitido / Não Utilizado" styleClass="badge-ativo"/>
+                    <Label fx:id="lblComprovanteStatus" text="Ativo" styleClass="badge-ativo"/>
                 </HBox>
             </VBox>
 
