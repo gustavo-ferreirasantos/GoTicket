@@ -79,7 +79,9 @@ public class VendaDAO {
 
         StringBuilder sql = new StringBuilder(
             "SELECT v.id AS venda_id, e.nome AS evento_nome, v.data_venda, v.forma_pagamento, " +
-            "v.valor_total, v.status, " +
+            "COALESCE((SELECT SUM(i0.preco_pago) FROM eventgo.ingresso i0 " +
+            "          WHERE i0.venda_id = v.id AND i0.status <> 'CANCELADO'), 0) AS valor_total, " +
+            "v.status, " +
             "(SELECT COUNT(*) FROM eventgo.ingresso i WHERE i.venda_id = v.id) AS qtd_ingressos, " +
             "(SELECT i2.codigo FROM eventgo.ingresso i2 WHERE i2.venda_id = v.id ORDER BY i2.id ASC LIMIT 1) AS primeiro_codigo, " +
             "(SELECT i3.status FROM eventgo.ingresso i3 WHERE i3.venda_id = v.id ORDER BY i3.id ASC LIMIT 1) AS status_ingresso " +

@@ -36,9 +36,16 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         NavigationUtil.setContentArea(contentArea);
+        configurarPermissoes();
 
         // Carrega Início (Dashboard) por padrão
         navDashboard();
+    }
+
+    private void configurarPermissoes() {
+        boolean podeUsarPortaria = SessaoUsuario.getInstancia().isPortaria();
+        btnNavCheckin.setVisible(podeUsarPortaria);
+        btnNavCheckin.setManaged(podeUsarPortaria);
     }
 
     private void destacarBotao(Button btn) {
@@ -77,8 +84,12 @@ public class MainController implements Initializable {
 
     @FXML
     public void navCheckin() {
+        if (!SessaoUsuario.getInstancia().isPortaria()) {
+            com.eventgo.util.AlertUtil.exibirErro("Usuário sem permissão para registrar entrada.");
+            return;
+        }
         destacarBotao(btnNavCheckin);
-        NavigationUtil.carregarView("placeholder.fxml");
+        NavigationUtil.carregarView("checkin.fxml");
     }
 
     @FXML

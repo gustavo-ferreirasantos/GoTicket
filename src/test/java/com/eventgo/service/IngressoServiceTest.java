@@ -19,7 +19,11 @@ import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -137,6 +141,65 @@ public class IngressoServiceTest {
         ingresso.setStatus(StatusIngresso.CANCELADO);
 
         when(ingressoDAO.buscarPorCodigo(codigo)).thenReturn(Optional.of(ingresso));
+
+        assertThrows(IllegalStateException.class, () ->
+                ingressoService.registrarCheckin(codigo));
+    }
+
+    @Test
+    @DisplayName("Deve registrar check-in de ingresso emitido")
+    void deveRegistrarCheckinIngressoEmitido() throws SQLException {
+        UUID codigo = UUID.randomUUID();
+        Ingresso ingresso = new Ingresso();
+        ingresso.setCodigo(codigo);
+        ingresso.setStatus(StatusIngresso.EMITIDO);
+
+        when(ingressoDAO.buscarPorCodigo(codigo)).thenReturn(Optional.of(ingresso));
+        when(ingressoDAO.registrarCheckin(codigo)).thenReturn(true);
+
+        Ingresso resultado = ingressoService.registrarCheckin(codigo);
+
+        assertEquals(StatusIngresso.UTILIZADO, resultado.getStatus());
+        assertNotNull(resultado.getDataCheckin());
+        verify(ingressoDAO).registrarCheckin(codigo);
+    }
+
+    @Test
+    @DisplayName("Deve impedir check-in de ingresso ainda não emitido")
+    void deveImpedirCheckinIngressoAtivo() throws SQLException {
+        UUID codigo = UUID.randomUUID();
+        Ingresso ingresso = new Ingresso();
+        ingresso.setCodigo(codigo);
+        ingresso.setStatus(StatusIngresso.ATIVO);
+
+        when(ingressoDAO.buscarPorCodigo(codigo)).thenReturn(Optional.of(ingresso));
+
+        assertThrows(IllegalStateException.class, () ->
+                ingressoService.registrarCheckin(codigo));
+        verify(ingressoDAO, never()).registrarCheckin(any());
+    }
+
+    @Test
+    @DisplayName("Deve informar quando o ingresso não existe")
+    void deveInformarIngressoInexistente() throws SQLException {
+        UUID codigo = UUID.randomUUID();
+        when(ingressoDAO.buscarPorCodigo(codigo)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () ->
+                ingressoService.registrarCheckin(codigo));
+        verify(ingressoDAO, never()).registrarCheckin(any());
+    }
+
+    @Test
+    @DisplayName("Deve rejeitar check-in perdido em concorrência")
+    void deveRejeitarCheckinConcorrente() throws SQLException {
+        UUID codigo = UUID.randomUUID();
+        Ingresso ingresso = new Ingresso();
+        ingresso.setCodigo(codigo);
+        ingresso.setStatus(StatusIngresso.EMITIDO);
+
+        when(ingressoDAO.buscarPorCodigo(codigo)).thenReturn(Optional.of(ingresso));
+        when(ingressoDAO.registrarCheckin(codigo)).thenReturn(false);
 
         assertThrows(IllegalStateException.class, () ->
                 ingressoService.registrarCheckin(codigo));

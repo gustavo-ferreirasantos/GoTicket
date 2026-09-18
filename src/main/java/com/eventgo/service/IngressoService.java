@@ -15,6 +15,7 @@ import java.io.ByteArrayInputStream;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -86,21 +87,58 @@ public class IngressoService {
         }
     }
 
-    public void registrarCheckin(UUID codigo) throws SQLException {
-        if (codigo == null) throw new IllegalArgumentException("Código do ingresso é obrigatório.");
+    public Ingresso registrarCheckin(UUID codigo) throws SQLException {
+        if (codigo == null) {
+            throw new IllegalArgumentException(
+                    "O código do ingresso é obrigatório.");
+        }
 
         Ingresso ingresso = ingressoDAO.buscarPorCodigo(codigo)
-                .orElseThrow(() -> new IllegalArgumentException("Ingresso não encontrado."));
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "ACESSO NEGADO: Ingresso não localizado."));
 
-        if (ingresso.getStatus() == StatusIngresso.CANCELADO) {
-            throw new IllegalStateException("ACESSO NEGADO: Este ingresso está CANCELADO.");
-        }
-        if (ingresso.getStatus() == StatusIngresso.UTILIZADO) {
-            throw new IllegalStateException("ACESSO NEGADO: Ingresso já UTILIZADO em " + ingresso.getDataCheckin());
+        switch (ingresso.getStatus()) {
+            case CANCELADO:
+                throw new IllegalStateException(
+                        "ACESSO NEGADO: Este ingresso está cancelado.");
+
+            case UTILIZADO:
+                String mensagem = "ACESSO NEGADO: Ingresso já utilizado";
+
+                if (ingresso.getDataCheckin() != null) {
+                    mensagem += " em " + ingresso.getDataCheckin();
+                }
+
+                throw new IllegalStateException(mensagem + ".");
+
+            case ATIVO:
+                throw new IllegalStateException(
+                        "ACESSO NEGADO: O ingresso ainda não foi emitido.");
+
+            case EMITIDO:
+                break;
+
+            default:
+                throw new IllegalStateException(
+                        "ACESSO NEGADO: Situação do ingresso inválida.");
         }
 
-        // RN-06
-        ingressoDAO.registrarCheckin(codigo);
+        boolean atualizado = ingressoDAO.registrarCheckin(codigo);
+
+        if (!atualizado) {
+            /*
+             * O ingresso pode ter sido utilizado ou cancelado por outra
+             * operação entre a consulta e o UPDATE.
+             */
+            throw new IllegalStateException(
+                    "ACESSO NEGADO: O ingresso não está mais disponível para utilização.");
+        }
+
+        ingresso.setStatus(StatusIngresso.UTILIZADO);
+        ingresso.setDataCheckin(LocalDateTime.now());
+
+        return ingresso;
     }
 
     public void marcarComoEmitido(UUID codigo) throws SQLException {

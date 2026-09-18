@@ -96,19 +96,18 @@ public class IngressoDAO {
         return lista;
     }
 
-    public void registrarCheckin(UUID codigo) throws SQLException {
-        String sql = "UPDATE eventgo.ingresso SET status = 'UTILIZADO', data_checkin = NOW() " +
-                     "WHERE codigo = ? AND status = 'ATIVO'";
+    public boolean registrarCheckin(UUID codigo) throws SQLException {
+        String sql =
+                "UPDATE eventgo.ingresso " +
+                        "SET status = 'UTILIZADO', data_checkin = NOW() " +
+                        "WHERE codigo = ? AND status = 'EMITIDO'";
 
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setObject(1, codigo);
 
-            int rows = stmt.executeUpdate();
-            if (rows == 0) {
-                throw new SQLException("Ingresso não está ATIVO ou código inexistente.");
-            }
+            return stmt.executeUpdate() == 1;
         }
     }
 
