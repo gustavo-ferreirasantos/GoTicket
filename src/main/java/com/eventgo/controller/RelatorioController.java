@@ -43,6 +43,7 @@ public class RelatorioController implements Initializable {
     @FXML private TableColumn<VendaRelatorioDTO, Integer> colQtdIngressos;
     @FXML private TableColumn<VendaRelatorioDTO, String> colValorTotal;
     @FXML private TableColumn<VendaRelatorioDTO, String> colStatus;
+    @FXML private TableColumn<VendaRelatorioDTO, String> colStatusIngresso;
     @FXML private TableColumn<VendaRelatorioDTO, Void> colAcoes;
 
     private final RelatorioService relatorioService;
@@ -180,6 +181,35 @@ public class RelatorioController implements Initializable {
             }
         });
 
+        colStatusIngresso.setCellValueFactory(cell -> {
+            VendaRelatorioDTO v = cell.getValue();
+            String status = v.getStatusIngresso() != null ? v.getStatusIngresso().getDescricao() : "-";
+            return javafx.beans.binding.Bindings.createStringBinding(() -> status);
+        });
+
+        colStatusIngresso.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    Label badge = new Label(item);
+                    badge.getStyleClass().clear();
+                    if ("Ativo".equals(item) || "Emitido / Não Utilizado".equals(item)) {
+                        badge.getStyleClass().add("badge-ativo");
+                    } else if ("Utilizado / Entrou".equals(item)) {
+                        badge.getStyleClass().add("badge-inativo");
+                    } else if ("Cancelado".equals(item)) {
+                        badge.getStyleClass().add("badge-cancelado");
+                    } else {
+                        badge.getStyleClass().add("badge-inativo");
+                    }
+                    setGraphic(badge);
+                }
+            }
+        });
+
         colAcoes.setCellFactory(col -> new TableCell<>() {
             private final Button btnReemitir = new Button("Emitir");
 
@@ -279,6 +309,8 @@ public class RelatorioController implements Initializable {
         } else {
             perguntarSalvarPdf(venda);
         }
+
+        carregarDados();
     }
 
     private void perguntarSalvarPdf(VendaRelatorioDTO venda) {

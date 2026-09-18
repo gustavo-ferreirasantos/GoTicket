@@ -52,7 +52,8 @@
                 <TableColumn fx:id="colPagamento" text="Pagamento" prefWidth="130"/>
                 <TableColumn fx:id="colQtdIngressos" text="Ingressos" prefWidth="80"/>
                 <TableColumn fx:id="colValorTotal" text="Valor Total" prefWidth="110"/>
-                <TableColumn fx:id="colStatus" text="Status" prefWidth="120"/>
+                <TableColumn fx:id="colStatus" text="Status Venda" prefWidth="120"/>
+                <TableColumn fx:id="colStatusIngresso" text="Status Ingresso" prefWidth="140"/>
                 <TableColumn fx:id="colAcoes" text="" prefWidth="120" maxWidth="120"/>
             </columns>
             <columnResizePolicy>

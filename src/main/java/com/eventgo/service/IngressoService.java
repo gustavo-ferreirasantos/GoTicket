@@ -3,9 +3,11 @@ package com.eventgo.service;
 import com.eventgo.config.DatabaseConfig;
 import com.eventgo.dao.IngressoDAO;
 import com.eventgo.dao.LoteDAO;
+import com.eventgo.dao.VendaDAO;
 import com.eventgo.model.Ingresso;
 import com.eventgo.model.enums.FormaPagamento;
 import com.eventgo.model.enums.StatusIngresso;
+import com.eventgo.model.enums.StatusVenda;
 import com.eventgo.util.ValidacaoUtil;
 
 import javax.print.*;
@@ -21,15 +23,18 @@ public class IngressoService {
 
     private final IngressoDAO ingressoDAO;
     private final LoteDAO loteDAO;
+    private final VendaDAO vendaDAO;
 
     public IngressoService() {
         this.ingressoDAO = new IngressoDAO();
         this.loteDAO = new LoteDAO();
+        this.vendaDAO = new VendaDAO();
     }
 
     public IngressoService(IngressoDAO ingressoDAO, LoteDAO loteDAO) {
         this.ingressoDAO = ingressoDAO;
         this.loteDAO = loteDAO;
+        this.vendaDAO = new VendaDAO();
     }
 
     public Optional<Ingresso> buscarPorCodigo(UUID codigo) throws SQLException {
@@ -63,6 +68,13 @@ public class IngressoService {
             try {
                 ingressoDAO.cancelar(conn, codigo, usuarioId, motivo.trim());
                 loteDAO.incrementarEstoque(conn, ingresso.getLoteId(), 1);
+
+                if (ingresso.getVendaId() != null) {
+                    int restantes = vendaDAO.contarIngressosAtivos(conn, ingresso.getVendaId());
+                    if (restantes == 0) {
+                        vendaDAO.atualizarStatus(conn, ingresso.getVendaId(), StatusVenda.CANCELADA);
+                    }
+                }
 
                 conn.commit();
             } catch (Exception e) {

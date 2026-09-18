@@ -4,6 +4,7 @@ import com.eventgo.config.DatabaseConfig;
 import com.eventgo.dto.VendaRelatorioDTO;
 import com.eventgo.model.Venda;
 import com.eventgo.model.enums.FormaPagamento;
+import com.eventgo.model.enums.StatusIngresso;
 import com.eventgo.model.enums.StatusVenda;
 
 import java.sql.*;
@@ -80,7 +81,8 @@ public class VendaDAO {
             "SELECT v.id AS venda_id, e.nome AS evento_nome, v.data_venda, v.forma_pagamento, " +
             "v.valor_total, v.status, " +
             "(SELECT COUNT(*) FROM eventgo.ingresso i WHERE i.venda_id = v.id) AS qtd_ingressos, " +
-            "(SELECT i2.codigo FROM eventgo.ingresso i2 WHERE i2.venda_id = v.id ORDER BY i2.id ASC LIMIT 1) AS primeiro_codigo " +
+            "(SELECT i2.codigo FROM eventgo.ingresso i2 WHERE i2.venda_id = v.id ORDER BY i2.id ASC LIMIT 1) AS primeiro_codigo, " +
+            "(SELECT i3.status FROM eventgo.ingresso i3 WHERE i3.venda_id = v.id ORDER BY i3.id ASC LIMIT 1) AS status_ingresso " +
             "FROM eventgo.venda v " +
             "JOIN eventgo.evento e ON v.evento_id = e.id " +
             "WHERE 1=1 "
@@ -124,6 +126,10 @@ public class VendaDAO {
                     dto.setQuantidadeIngressos(rs.getInt("qtd_ingressos"));
                     UUID codigo = (UUID) rs.getObject("primeiro_codigo");
                     dto.setPrimeiroIngressoCodigo(codigo);
+                    String statusIngressoStr = rs.getString("status_ingresso");
+                    if (statusIngressoStr != null) {
+                        dto.setStatusIngresso(StatusIngresso.valueOf(statusIngressoStr));
+                    }
                     lista.add(dto);
                 }
             }
@@ -142,5 +148,31 @@ public class VendaDAO {
         v.setDataVenda(rs.getTimestamp("data_venda").toLocalDateTime());
         v.setCriadoEm(rs.getTimestamp("criado_em").toLocalDateTime());
         return v;
+    }
+
+    public void atualizarStatus(Connection conn, Long vendaId, StatusVenda status) throws SQLException {
+        String sql = "UPDATE eventgo.venda SET status = ? WHERE id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, status.name());
+            stmt.setLong(2, vendaId);
+            stmt.executeUpdate();
+        }
+    }
+
+    public int contarIngressosAtivos(Long vendaId) throws SQLException {
+        try (Connection conn = DatabaseConfig.getConnection()) {
+            return contarIngressosAtivos(conn, vendaId);
+        }
+    }
+
+    public int contarIngressosAtivos(Connection conn, Long vendaId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM eventgo.ingresso WHERE venda_id = ? AND status IN ('ATIVO','EMITIDO')";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, vendaId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                rs.next();
+                return rs.getInt(1);
+            }
+        }
     }
 }

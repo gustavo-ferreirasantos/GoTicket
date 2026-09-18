@@ -1,6 +1,7 @@
 package com.eventgo.dto;
 
 import com.eventgo.model.enums.FormaPagamento;
+import com.eventgo.model.enums.StatusIngresso;
 import com.eventgo.model.enums.StatusVenda;
 
 import java.math.BigDecimal;
@@ -16,6 +17,7 @@ public class VendaRelatorioDTO {
     private StatusVenda status;
     private int quantidadeIngressos;
     private UUID primeiroIngressoCodigo;
+    private StatusIngresso statusIngresso;
 
     public VendaRelatorioDTO() {}
 
@@ -42,4 +44,7 @@ public class VendaRelatorioDTO {
 
     public UUID getPrimeiroIngressoCodigo() { return primeiroIngressoCodigo; }
     public void setPrimeiroIngressoCodigo(UUID primeiroIngressoCodigo) { this.primeiroIngressoCodigo = primeiroIngressoCodigo; }
+
+    public StatusIngresso getStatusIngresso() { return statusIngresso; }
+    public void setStatusIngresso(StatusIngresso statusIngresso) { this.statusIngresso = statusIngresso; }
 }
