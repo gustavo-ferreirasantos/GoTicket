@@ -375,6 +375,18 @@ public class VendaController implements Initializable {
             return;
         }
 
+        if (tel.length() > 20) {
+            AlertUtil.exibirAviso("O telefone deve ter no máximo 20 caracteres.");
+            txtTelefoneParticipante.requestFocus();
+            return;
+        }
+
+        if (!tel.matches("\\d+")) {
+            AlertUtil.exibirAviso("O telefone deve conter apenas dígitos.");
+            txtTelefoneParticipante.requestFocus();
+            return;
+        }
+
         mostrarStep(3);
     }
 
