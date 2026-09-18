@@ -91,7 +91,7 @@ public class DashboardController implements Initializable {
 
     @FXML
     public void atalhoCancelamento() {
-        NavigationUtil.carregarView("placeholder.fxml");
+        NavigationUtil.carregarView("cancelamento.fxml");
     }
 
     @FXML
