@@ -76,7 +76,10 @@ public class DashboardController implements Initializable {
 
     @FXML
     public void atalhoNovoEvento() {
-        NavigationUtil.carregarView("evento.fxml");
+        EventoController controller = NavigationUtil.carregarView("evento.fxml");
+        if (controller != null) {
+            controller.abrirModalNovoEvento();
+        }
     }
 
     @FXML
@@ -86,7 +89,11 @@ public class DashboardController implements Initializable {
 
     @FXML
     public void atalhoCheckin() {
-        NavigationUtil.carregarView("placeholder.fxml");
+        if (!SessaoUsuario.getInstancia().isPortaria()) {
+            AlertUtil.exibirErro("Usuário sem permissão para registrar entrada.");
+            return;
+        }
+        NavigationUtil.carregarView("checkin.fxml");
     }
 
     @FXML

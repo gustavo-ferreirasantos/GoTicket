@@ -104,7 +104,7 @@ docker compose up -d
 ## 8. 📋 Guia Rápido: Copiar e Colar para Testes
 
 ### 🎟️ Passo 1: Criar um Evento
-Acesse o menu **Eventos** > clique em **+ Novo Evento** e preencha:
+Acesse o menu **Eventos** > clique em **Cadastrar Evento** (ou pelo atalho da página inicial) e preencha:
 
 - **Nome do evento**:
 ```text

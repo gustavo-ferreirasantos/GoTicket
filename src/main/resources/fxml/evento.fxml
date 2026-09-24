@@ -18,7 +18,7 @@
             <TextField fx:id="txtBuscar" promptText="Buscar evento..." prefWidth="320.0"
                        onKeyReleased="#aplicarBusca"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button text="+ Novo Evento" styleClass="btn-primary" onAction="#abrirModalNovoEvento"/>
+            <Button text="Cadastrar Evento" styleClass="btn-primary" onAction="#abrirModalNovoEvento"/>
         </HBox>
 
         <!-- Table: Frame03ListadeEventos -->

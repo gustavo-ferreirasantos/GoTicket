@@ -164,7 +164,7 @@ public class EventoController implements Initializable {
                 });
 
                 btnRelatorio.setOnAction(evt -> {
-                    NavigationUtil.carregarView("placeholder.fxml");
+                    NavigationUtil.carregarView("relatorio.fxml");
                 });
             }
 
