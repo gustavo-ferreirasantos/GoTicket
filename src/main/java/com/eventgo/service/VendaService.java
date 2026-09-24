@@ -18,7 +18,9 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class VendaService {
 
@@ -45,8 +47,11 @@ public class VendaService {
         validarVendaDTO(dto);
 
         for (ItemVendaDTO item : dto.getItens()) {
-            if (item.getQuantidade() != 1) {
-                throw new IllegalArgumentException("Apenas 1 ingresso por transação é permitido.");
+            if (item.getLoteId() == null) {
+                throw new IllegalArgumentException("Todo item da venda deve ter um lote.");
+            }
+            if (item.getQuantidade() < 1) {
+                throw new IllegalArgumentException("A quantidade de cada item deve ser de pelo menos 1 ingresso.");
             }
         }
 
@@ -60,6 +65,8 @@ public class VendaService {
 
         BigDecimal valorTotalVenda = BigDecimal.ZERO;
         List<Ingresso> ingressosParaCriar = new ArrayList<>();
+        // Quantidade acumulada por lote, pois vários itens podem usar o mesmo lote
+        Map<Long, Integer> solicitadoPorLote = new HashMap<>();
 
         // Abre conexão e inicia transação
         try (Connection conn = DatabaseConfig.getConnection()) {
@@ -75,9 +82,10 @@ public class VendaService {
                     if (!lote.isVigente()) {
                         throw new IllegalStateException("O lote #" + lote.getNumeroLote() + " não está vigente ou não possui estoque suficiente.");
                     }
-                    if (lote.getQuantidadeDisponivel() < item.getQuantidade()) {
+                    int solicitado = solicitadoPorLote.merge(lote.getId(), item.getQuantidade(), Integer::sum);
+                    if (lote.getQuantidadeDisponivel() < solicitado) {
                         throw new IllegalStateException("Estoque insuficiente para o lote #" + lote.getNumeroLote() +
-                                ". Disponível: " + lote.getQuantidadeDisponivel() + ", Solicitado: " + item.getQuantidade());
+                                ". Disponível: " + lote.getQuantidadeDisponivel() + ", Solicitado: " + solicitado);
                     }
 
                     // Decrementa estoque atomicamente (RN-04)

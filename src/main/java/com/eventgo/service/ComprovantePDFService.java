@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
 
 public class ComprovantePDFService {
@@ -23,22 +24,40 @@ public class ComprovantePDFService {
     private static final DateTimeFormatter DATA_HORA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
     public static byte[] gerarComprovantePDF(Ingresso ingresso, FormaPagamento formaPagamento) throws Exception {
+        return gerarComprovantePDF(List.of(ingresso), formaPagamento);
+    }
+
+    /** Gera um único PDF com uma página por ingresso. */
+    public static byte[] gerarComprovantePDF(List<Ingresso> ingressos, FormaPagamento formaPagamento) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        gerarDocumento(ingresso, formaPagamento, baos);
+        gerarDocumento(ingressos, formaPagamento, baos);
         return baos.toByteArray();
     }
 
     public static void salvarComprovanteEmArquivo(Ingresso ingresso, FormaPagamento formaPagamento, Path caminhoDestino) throws Exception {
+        salvarComprovanteEmArquivo(List.of(ingresso), formaPagamento, caminhoDestino);
+    }
+
+    public static void salvarComprovanteEmArquivo(List<Ingresso> ingressos, FormaPagamento formaPagamento, Path caminhoDestino) throws Exception {
         try (FileOutputStream fos = new FileOutputStream(caminhoDestino.toFile())) {
-            gerarDocumento(ingresso, formaPagamento, fos);
+            gerarDocumento(ingressos, formaPagamento, fos);
         }
     }
 
-    private static void gerarDocumento(Ingresso ingresso, FormaPagamento formaPagamento, OutputStream out) throws Exception {
+    private static void gerarDocumento(List<Ingresso> ingressos, FormaPagamento formaPagamento, OutputStream out) throws Exception {
         Document document = new Document(PageSize.A6, 20, 20, 20, 20); // Tamanho compacto para ingresso
         PdfWriter.getInstance(document, out);
         document.open();
 
+        for (int i = 0; i < ingressos.size(); i++) {
+            if (i > 0) document.newPage();
+            adicionarPaginaIngresso(document, ingressos.get(i), formaPagamento);
+        }
+
+        document.close();
+    }
+
+    private static void adicionarPaginaIngresso(Document document, Ingresso ingresso, FormaPagamento formaPagamento) throws Exception {
         // Estilos
         Font fontTitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, new Color(49, 46, 129));
         Font fontSubtitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, Color.DARK_GRAY);
@@ -104,8 +123,6 @@ public class ComprovantePDFService {
                 "\nApresente este documento na portaria para controle de entrada.", fontRodape);
         pRodape.setAlignment(Element.ALIGN_CENTER);
         document.add(pRodape);
-
-        document.close();
     }
 
     private static void adicionarLinha(PdfPTable table, String rotulo, String valor, Font fRotulo, Font fValor) {

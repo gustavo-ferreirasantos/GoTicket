@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -147,17 +148,32 @@ public class IngressoService {
     }
 
     public byte[] emitirComprovantePDF(UUID codigo, FormaPagamento formaPagamento) throws Exception {
-        Ingresso ingresso = ingressoDAO.buscarPorCodigo(codigo)
-                .orElseThrow(() -> new IllegalArgumentException("Ingresso não encontrado para emissão."));
+        return emitirComprovantePDF(List.of(codigo), formaPagamento);
+    }
 
-        return ComprovantePDFService.gerarComprovantePDF(ingresso, formaPagamento);
+    /** Gera um único PDF com uma página para cada ingresso informado. */
+    public byte[] emitirComprovantePDF(List<UUID> codigos, FormaPagamento formaPagamento) throws Exception {
+        return ComprovantePDFService.gerarComprovantePDF(buscarParaEmissao(codigos), formaPagamento);
     }
 
     public void salvarComprovantePDF(UUID codigo, FormaPagamento formaPagamento, Path caminhoDestino) throws Exception {
-        Ingresso ingresso = ingressoDAO.buscarPorCodigo(codigo)
-                .orElseThrow(() -> new IllegalArgumentException("Ingresso não encontrado para emissão."));
+        salvarComprovantePDF(List.of(codigo), formaPagamento, caminhoDestino);
+    }
 
-        ComprovantePDFService.salvarComprovanteEmArquivo(ingresso, formaPagamento, caminhoDestino);
+    public void salvarComprovantePDF(List<UUID> codigos, FormaPagamento formaPagamento, Path caminhoDestino) throws Exception {
+        ComprovantePDFService.salvarComprovanteEmArquivo(buscarParaEmissao(codigos), formaPagamento, caminhoDestino);
+    }
+
+    private List<Ingresso> buscarParaEmissao(List<UUID> codigos) throws SQLException {
+        if (codigos == null || codigos.isEmpty()) {
+            throw new IllegalArgumentException("Nenhum ingresso informado para emissão.");
+        }
+        List<Ingresso> ingressos = new ArrayList<>();
+        for (UUID codigo : codigos) {
+            ingressos.add(ingressoDAO.buscarPorCodigo(codigo)
+                    .orElseThrow(() -> new IllegalArgumentException("Ingresso não encontrado para emissão.")));
+        }
+        return ingressos;
     }
 
     /**
@@ -165,7 +181,11 @@ public class IngressoService {
      * Em caso de falha, retorna false para que o chamador ofereça salvar como PDF.
      */
     public boolean imprimirIngressoLocal(UUID codigo, FormaPagamento formaPagamento) throws Exception {
-        byte[] pdfBytes = emitirComprovantePDF(codigo, formaPagamento);
+        return imprimirIngressosLocal(List.of(codigo), formaPagamento);
+    }
+
+    public boolean imprimirIngressosLocal(List<UUID> codigos, FormaPagamento formaPagamento) throws Exception {
+        byte[] pdfBytes = emitirComprovantePDF(codigos, formaPagamento);
 
         try {
             DocFlavor flavor = DocFlavor.INPUT_STREAM.PDF;

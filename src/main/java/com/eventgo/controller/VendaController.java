@@ -11,7 +11,11 @@ import com.eventgo.util.ValidacaoUtil;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
@@ -21,8 +25,10 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.UUID;
 
@@ -45,32 +51,24 @@ public class VendaController implements Initializable {
     @FXML private ComboBox<Evento> cbEventos;
     @FXML private ComboBox<Setor> cbSetores;
     @FXML private ComboBox<TipoIngresso> cbTiposIngresso;
+    @FXML private Spinner<Integer> spQuantidade;
     @FXML private Label lblDisponibilidade;
-    @FXML private Label lblItemResumo;
-    @FXML private Label lblSubtotalResumo;
+    @FXML private VBox vboxCarrinho;
     @FXML private Label lblTotalResumo;
 
     // Step 2 Controls
-    @FXML private TextField txtCpfParticipante;
-    @FXML private TextField txtNomeParticipante;
-    @FXML private TextField txtEmailParticipante;
-    @FXML private TextField txtTelefoneParticipante;
+    @FXML private VBox vboxParticipantes;
 
     // Step 3 Controls
     @FXML private Button btnPayCartao;
     @FXML private Button btnPayDinheiro;
     @FXML private Button btnPayPix;
-    @FXML private Label lblItemResumoStep3;
-    @FXML private Label lblSubtotalStep3;
+    @FXML private VBox vboxResumoStep3;
     @FXML private Label lblTotalStep3;
 
     // Step 4 Controls
-    @FXML private Label lblComprovanteEventoNome;
-    @FXML private Label lblComprovanteEventoDetalhes;
-    @FXML private Label lblComprovanteParticipante;
-    @FXML private Label lblComprovanteSetor;
-    @FXML private Label lblComprovanteIdentificador;
-    @FXML private Label lblComprovanteStatus;
+    @FXML private Label lblVendaConcluida;
+    @FXML private FlowPane flowComprovantes;
 
     // Services
     private final EventoService eventoService;
@@ -85,9 +83,70 @@ public class VendaController implements Initializable {
     private FormaPagamento formaPagamentoSelecionada = FormaPagamento.CARTAO_CREDITO;
     private Venda vendaConcluida;
 
+    // Carrinho da venda: todos os itens pertencem ao mesmo evento
+    private final List<ItemCarrinho> carrinho = new ArrayList<>();
+    private Evento eventoDoCarrinho;
+    private boolean revertendoEvento;
+
+    // Um formulário de titular por ingresso (na ordem de ingressosDoCarrinho())
+    private final List<FormParticipante> formsParticipantes = new ArrayList<>();
+    private final List<Label> statusComprovantes = new ArrayList<>();
+
     private final NumberFormat moedaFormat = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
+    private static class ItemCarrinho {
+        final Setor setor;
+        final TipoIngresso tipo;
+        final Lote lote;
+        int quantidade;
+
+        ItemCarrinho(Setor setor, TipoIngresso tipo, Lote lote, int quantidade) {
+            this.setor = setor;
+            this.tipo = tipo;
+            this.lote = lote;
+            this.quantidade = quantidade;
+        }
+
+        String descricao() {
+            return setor.getNome() + " (" + tipo.getNome() + ")";
+        }
+
+        BigDecimal subtotal() {
+            return lote.getPreco().multiply(BigDecimal.valueOf(quantidade));
+        }
+    }
+
+    private static class FormParticipante {
+        final TextField txtCpf = new TextField();
+        final TextField txtNome = new TextField();
+        final TextField txtEmail = new TextField();
+        final TextField txtTelefone = new TextField();
+
+        FormParticipante() {
+            txtCpf.setPromptText("000.000.000-00");
+            txtNome.setPromptText("Nome do titular");
+            txtEmail.setPromptText("email@exemplo.com");
+            txtTelefone.setPromptText("(00) 00000-0000");
+        }
+
+        void copiarDe(FormParticipante outro) {
+            txtCpf.setText(outro.txtCpf.getText());
+            txtNome.setText(outro.txtNome.getText());
+            txtEmail.setText(outro.txtEmail.getText());
+            txtTelefone.setText(outro.txtTelefone.getText());
+        }
+
+        String cpf() { return texto(txtCpf); }
+        String nome() { return texto(txtNome); }
+        String email() { return texto(txtEmail); }
+        String telefone() { return texto(txtTelefone); }
+
+        private static String texto(TextField campo) {
+            return campo.getText() != null ? campo.getText().trim() : "";
+        }
+    }
 
     public VendaController() {
         this.eventoService = new EventoService();
@@ -102,7 +161,9 @@ public class VendaController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         configurarComboBoxes();
+        spQuantidade.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 1, 1));
         carregarEventosAbertos();
+        atualizarCarrinho();
         mostrarStep(1);
     }
 
@@ -172,8 +233,24 @@ public class VendaController implements Initializable {
 
     @FXML
     public void aoSelecionarEvento() {
+        if (revertendoEvento) return;
         Evento evento = cbEventos.getValue();
         if (evento == null) return;
+
+        // Uma venda pertence a um único evento: trocar de evento esvazia o carrinho
+        if (!carrinho.isEmpty() && !Objects.equals(evento.getId(), eventoDoCarrinho.getId())) {
+            boolean trocar = AlertUtil.confirmar("Trocar de evento",
+                    "Os ingressos já adicionados são de outro evento e serão removidos. Deseja continuar?");
+            if (!trocar) {
+                revertendoEvento = true;
+                cbEventos.setValue(eventoDoCarrinho);
+                revertendoEvento = false;
+                return;
+            }
+            carrinho.clear();
+            atualizarCarrinho();
+        }
+
         try {
             List<Setor> setores = setorService.listarPorEvento(evento.getId());
             cbSetores.setItems(FXCollections.observableArrayList(setores));
@@ -183,7 +260,8 @@ public class VendaController implements Initializable {
             } else {
                 cbSetores.setValue(null);
                 cbTiposIngresso.getItems().clear();
-                lblDisponibilidade.setText("0 ingressos disponíveis");
+                loteAtivo = null;
+                atualizarDisponibilidade();
             }
         } catch (SQLException e) {
             AlertUtil.exibirErro("Erro ao carregar setores: " + e.getMessage());
@@ -202,7 +280,8 @@ public class VendaController implements Initializable {
                 aoSelecionarTipo();
             } else {
                 cbTiposIngresso.setValue(null);
-                lblDisponibilidade.setText("0 ingressos disponíveis");
+                loteAtivo = null;
+                atualizarDisponibilidade();
             }
         } catch (SQLException e) {
             AlertUtil.exibirErro("Erro ao carregar tipos: " + e.getMessage());
@@ -215,17 +294,165 @@ public class VendaController implements Initializable {
         if (tipo == null) return;
         try {
             List<Lote> lotes = loteService.buscarDisponiveis(tipo.getId());
-            if (!lotes.isEmpty()) {
-                loteAtivo = lotes.get(0);
-                lblDisponibilidade.setText(loteAtivo.getQuantidadeDisponivel() + " ingressos disponíveis");
-            } else {
-                loteAtivo = null;
-                lblDisponibilidade.setText("0 ingressos disponíveis");
-            }
-            atualizarResumoStep1();
+            loteAtivo = lotes.isEmpty() ? null : lotes.get(0);
+            atualizarDisponibilidade();
         } catch (SQLException e) {
             AlertUtil.exibirErro("Erro ao buscar lote: " + e.getMessage());
         }
+    }
+
+    /** Ingressos do lote ativo que ainda podem ser adicionados (estoque menos o que já está no carrinho). */
+    private int disponivelParaAdicionar() {
+        if (loteAtivo == null) return 0;
+        int noCarrinho = carrinho.stream()
+                .filter(i -> Objects.equals(i.lote.getId(), loteAtivo.getId()))
+                .mapToInt(i -> i.quantidade)
+                .sum();
+        return Math.max(0, loteAtivo.getQuantidadeDisponivel() - noCarrinho);
+    }
+
+    private void atualizarDisponibilidade() {
+        int disponivel = disponivelParaAdicionar();
+        if (loteAtivo == null) {
+            lblDisponibilidade.setText("0 ingressos disponíveis");
+        } else {
+            lblDisponibilidade.setText(disponivel + " ingressos disponíveis — " + moedaFormat.format(loteAtivo.getPreco()) + " cada");
+        }
+        int max = Math.max(1, disponivel);
+        spQuantidade.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, max, 1));
+        spQuantidade.setDisable(disponivel == 0);
+    }
+
+    @FXML
+    public void adicionarAoCarrinho() {
+        if (loteAtivo == null || cbEventos.getValue() == null || cbSetores.getValue() == null || cbTiposIngresso.getValue() == null) {
+            AlertUtil.exibirAviso("Selecione um evento, setor e tipo de ingresso válidos.");
+            return;
+        }
+
+        int quantidade;
+        try {
+            // O texto digitado no Spinner só é confirmado com Enter, então lemos direto do editor
+            quantidade = Integer.parseInt(spQuantidade.getEditor().getText().trim());
+        } catch (NumberFormatException e) {
+            AlertUtil.exibirAviso("Informe uma quantidade válida.");
+            return;
+        }
+
+        int disponivel = disponivelParaAdicionar();
+        if (quantidade < 1) {
+            AlertUtil.exibirAviso("A quantidade deve ser de pelo menos 1 ingresso.");
+            return;
+        }
+        if (quantidade > disponivel) {
+            AlertUtil.exibirAviso("Quantidade indisponível. Restam " + disponivel + " ingressos deste tipo para adicionar.");
+            return;
+        }
+
+        ItemCarrinho existente = carrinho.stream()
+                .filter(i -> Objects.equals(i.lote.getId(), loteAtivo.getId()))
+                .findFirst()
+                .orElse(null);
+        if (existente != null) {
+            existente.quantidade += quantidade;
+        } else {
+            carrinho.add(new ItemCarrinho(cbSetores.getValue(), cbTiposIngresso.getValue(), loteAtivo, quantidade));
+        }
+        eventoDoCarrinho = cbEventos.getValue();
+
+        atualizarCarrinho();
+        atualizarDisponibilidade();
+    }
+
+    /** Ajusta a quantidade de um item já no carrinho, entre 1 e o estoque do lote. */
+    private void alterarQuantidade(ItemCarrinho item, int delta) {
+        int novaQuantidade = item.quantidade + delta;
+        if (novaQuantidade < 1 || novaQuantidade > item.lote.getQuantidadeDisponivel()) return;
+        item.quantidade = novaQuantidade;
+        atualizarCarrinho();
+        atualizarDisponibilidade();
+    }
+
+    private void removerDoCarrinho(ItemCarrinho item) {
+        carrinho.remove(item);
+        atualizarCarrinho();
+        atualizarDisponibilidade();
+    }
+
+    private BigDecimal totalCarrinho() {
+        return carrinho.stream().map(ItemCarrinho::subtotal).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /** Lista "achatada" com um item por ingresso, na ordem em que os titulares são pedidos. */
+    private List<ItemCarrinho> ingressosDoCarrinho() {
+        List<ItemCarrinho> ingressos = new ArrayList<>();
+        for (ItemCarrinho item : carrinho) {
+            for (int i = 0; i < item.quantidade; i++) {
+                ingressos.add(item);
+            }
+        }
+        return ingressos;
+    }
+
+    private void atualizarCarrinho() {
+        vboxCarrinho.getChildren().clear();
+        vboxResumoStep3.getChildren().clear();
+
+        if (carrinho.isEmpty()) {
+            Label vazio = new Label("Nenhum ingresso adicionado. Escolha setor, tipo e quantidade e clique em \"Adicionar\".");
+            vazio.getStyleClass().add("subtitle-light");
+            vazio.setWrapText(true);
+            vboxCarrinho.getChildren().add(vazio);
+        }
+
+        for (ItemCarrinho item : carrinho) {
+            String descItem = item.quantidade + "x " + item.descricao();
+
+            Label lblDesc = new Label(item.descricao() + " — " + moedaFormat.format(item.lote.getPreco()) + " cada");
+            lblDesc.getStyleClass().add("subtitle-light");
+            lblDesc.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(lblDesc, Priority.ALWAYS);
+
+            Button btnDiminuir = new Button("−");
+            btnDiminuir.getStyleClass().add("btn-secondary");
+            btnDiminuir.setDisable(item.quantidade <= 1);
+            btnDiminuir.setOnAction(e -> alterarQuantidade(item, -1));
+            Label lblQuantidade = new Label(String.valueOf(item.quantidade));
+            lblQuantidade.getStyleClass().add("field-label");
+            lblQuantidade.setMinWidth(28);
+            lblQuantidade.setAlignment(Pos.CENTER);
+            Button btnAumentar = new Button("+");
+            btnAumentar.getStyleClass().add("btn-secondary");
+            btnAumentar.setDisable(item.quantidade >= item.lote.getQuantidadeDisponivel());
+            btnAumentar.setOnAction(e -> alterarQuantidade(item, +1));
+            HBox controleQuantidade = new HBox(6, btnDiminuir, lblQuantidade, btnAumentar);
+            controleQuantidade.setAlignment(Pos.CENTER);
+
+            Label lblSubtotal = new Label(moedaFormat.format(item.subtotal()));
+            lblSubtotal.getStyleClass().add("field-label");
+            lblSubtotal.setMinWidth(90);
+            lblSubtotal.setAlignment(Pos.CENTER_RIGHT);
+            Button btnRemover = new Button("Remover");
+            btnRemover.getStyleClass().add("btn-secondary");
+            btnRemover.setOnAction(e -> removerDoCarrinho(item));
+            HBox linha = new HBox(12, lblDesc, controleQuantidade, lblSubtotal, btnRemover);
+            linha.setAlignment(Pos.CENTER_LEFT);
+            vboxCarrinho.getChildren().add(linha);
+
+            Label lblDescStep3 = new Label(descItem);
+            lblDescStep3.getStyleClass().add("subtitle-light");
+            lblDescStep3.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(lblDescStep3, Priority.ALWAYS);
+            Label lblSubtotalStep3 = new Label(moedaFormat.format(item.subtotal()));
+            lblSubtotalStep3.getStyleClass().add("field-label");
+            HBox linhaStep3 = new HBox(lblDescStep3, lblSubtotalStep3);
+            linhaStep3.setAlignment(Pos.CENTER_LEFT);
+            vboxResumoStep3.getChildren().add(linhaStep3);
+        }
+
+        String total = moedaFormat.format(totalCarrinho());
+        lblTotalResumo.setText(total);
+        lblTotalStep3.setText(total);
     }
 
     @FXML
@@ -261,31 +488,6 @@ public class VendaController implements Initializable {
         }
     }
 
-    private void atualizarResumoStep1() {
-        if (loteAtivo != null && cbSetores.getValue() != null && cbTiposIngresso.getValue() != null) {
-            BigDecimal subtotal = loteAtivo.getPreco();
-            String descItem = "1x " + cbSetores.getValue().getNome() + " (" + cbTiposIngresso.getValue().getNome() + ")";
-            lblItemResumo.setText(descItem + " — " + moedaFormat.format(loteAtivo.getPreco()));
-            lblSubtotalResumo.setText(moedaFormat.format(subtotal));
-            lblTotalResumo.setText(moedaFormat.format(subtotal));
-
-            if (lblItemResumoStep3 != null) {
-                lblItemResumoStep3.setText(descItem);
-                lblSubtotalStep3.setText(moedaFormat.format(subtotal));
-                lblTotalStep3.setText(moedaFormat.format(subtotal));
-            }
-        } else {
-            lblItemResumo.setText("0x Ingresso");
-            lblSubtotalResumo.setText("R$ 0,00");
-            lblTotalResumo.setText("R$ 0,00");
-            if (lblItemResumoStep3 != null) {
-                lblItemResumoStep3.setText("0x Ingresso");
-                lblSubtotalStep3.setText("R$ 0,00");
-                lblTotalStep3.setText("R$ 0,00");
-            }
-        }
-    }
-
     // ================= Stepper Navigation =================
     private void mostrarStep(int step) {
         step1Pane.setVisible(step == 1);
@@ -311,7 +513,7 @@ public class VendaController implements Initializable {
                 step3Label.getStyleClass().add("active");
                 lblEtapaTitulo.setText("Nova Venda — Pagamento");
                 atualizarBotoesPagamento();
-                atualizarResumoStep1();
+                atualizarCarrinho();
             }
             case 4 -> {
                 step4Label.getStyleClass().add("active");
@@ -326,131 +528,235 @@ public class VendaController implements Initializable {
 
     @FXML
     public void avancarParaStep2() {
-        if (loteAtivo == null || cbEventos.getValue() == null) {
-            AlertUtil.exibirAviso("Selecione um evento, setor e tipo de ingresso válidos.");
+        // Atalho: com o carrinho vazio, "Continuar" adiciona a seleção atual
+        if (carrinho.isEmpty() && loteAtivo != null) {
+            adicionarAoCarrinho();
+        }
+        if (carrinho.isEmpty()) {
+            AlertUtil.exibirAviso("Adicione pelo menos um ingresso à venda antes de continuar.");
             return;
         }
+        montarFormulariosParticipantes();
         mostrarStep(2);
+    }
+
+    /** Cria um formulário de titular por ingresso, preservando o que já foi digitado. */
+    private void montarFormulariosParticipantes() {
+        List<ItemCarrinho> ingressos = ingressosDoCarrinho();
+
+        while (formsParticipantes.size() < ingressos.size()) {
+            formsParticipantes.add(new FormParticipante());
+        }
+        while (formsParticipantes.size() > ingressos.size()) {
+            formsParticipantes.remove(formsParticipantes.size() - 1);
+        }
+
+        vboxParticipantes.getChildren().clear();
+        for (int i = 0; i < ingressos.size(); i++) {
+            FormParticipante form = formsParticipantes.get(i);
+
+            Label titulo = new Label("Ingresso " + (i + 1) + " de " + ingressos.size() + " — " + ingressos.get(i).descricao());
+            titulo.getStyleClass().add("field-label");
+            titulo.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(titulo, Priority.ALWAYS);
+            HBox cabecalho = new HBox(12, titulo);
+            cabecalho.setAlignment(Pos.CENTER_LEFT);
+            if (i > 0) {
+                FormParticipante anterior = formsParticipantes.get(i - 1);
+                Button btnCopiar = new Button("Repetir dados do anterior");
+                btnCopiar.getStyleClass().add("btn-secondary");
+                btnCopiar.setOnAction(e -> form.copiarDe(anterior));
+                cabecalho.getChildren().add(btnCopiar);
+            }
+
+            HBox linha1 = new HBox(16, campo("CPF", form.txtCpf), campo("Nome Completo", form.txtNome));
+            HBox linha2 = new HBox(16, campo("E-mail", form.txtEmail), campo("Telefone", form.txtTelefone));
+
+            VBox bloco = new VBox(12, cabecalho, linha1, linha2);
+            bloco.getStyleClass().add("summary-panel");
+            vboxParticipantes.getChildren().add(bloco);
+        }
+    }
+
+    private VBox campo(String rotulo, TextField campo) {
+        Label label = new Label(rotulo);
+        label.getStyleClass().add("field-label");
+        VBox box = new VBox(6, label, campo);
+        HBox.setHgrow(box, Priority.ALWAYS);
+        return box;
     }
 
     @FXML
     public void avancarParaStep3() {
-        String cpf = txtCpfParticipante.getText() != null ? txtCpfParticipante.getText().trim() : "";
-        String nome = txtNomeParticipante.getText() != null ? txtNomeParticipante.getText().trim() : "";
-        String email = txtEmailParticipante.getText() != null ? txtEmailParticipante.getText().trim() : "";
-        String tel = txtTelefoneParticipante.getText() != null ? txtTelefoneParticipante.getText().trim() : "";
+        for (int i = 0; i < formsParticipantes.size(); i++) {
+            if (!validarParticipante(formsParticipantes.get(i), i + 1)) return;
+        }
+        mostrarStep(3);
+    }
+
+    private boolean validarParticipante(FormParticipante form, int numeroIngresso) {
+        String prefixo = formsParticipantes.size() > 1 ? "Ingresso " + numeroIngresso + ": " : "";
+        String cpf = form.cpf();
+        String nome = form.nome();
+        String email = form.email();
+        String tel = form.telefone();
 
         if (cpf.isEmpty()) {
-            AlertUtil.exibirAviso("O campo CPF é obrigatório.");
-            txtCpfParticipante.requestFocus();
-            return;
+            return invalido(prefixo + "O campo CPF é obrigatório.", form.txtCpf);
         }
-
         if (!ValidacaoUtil.isCpfValido(cpf)) {
-            AlertUtil.exibirAviso("O CPF informado é inválido. Digite um CPF válido com 11 dígitos.");
-            txtCpfParticipante.requestFocus();
-            return;
+            return invalido(prefixo + "O CPF informado é inválido. Digite um CPF válido com 11 dígitos.", form.txtCpf);
         }
-
         if (nome.isEmpty() || nome.length() < 3) {
-            AlertUtil.exibirAviso("O campo Nome Completo é obrigatório e deve ter no mínimo 3 caracteres.");
-            txtNomeParticipante.requestFocus();
-            return;
+            return invalido(prefixo + "O campo Nome Completo é obrigatório e deve ter no mínimo 3 caracteres.", form.txtNome);
         }
-
         if (email.isEmpty()) {
-            AlertUtil.exibirAviso("O campo E-mail (Gmail/correio eletrônico) é obrigatório.");
-            txtEmailParticipante.requestFocus();
-            return;
+            return invalido(prefixo + "O campo E-mail (Gmail/correio eletrônico) é obrigatório.", form.txtEmail);
         }
-
         if (!ValidacaoUtil.isEmailValido(email)) {
-            AlertUtil.exibirAviso("O E-mail informado é inválido. Exemplo: usuario@email.com");
-            txtEmailParticipante.requestFocus();
-            return;
+            return invalido(prefixo + "O E-mail informado é inválido. Exemplo: usuario@email.com", form.txtEmail);
         }
-
         if (tel.isEmpty()) {
-            AlertUtil.exibirAviso("O campo Telefone é obrigatório.");
-            txtTelefoneParticipante.requestFocus();
-            return;
+            return invalido(prefixo + "O campo Telefone é obrigatório.", form.txtTelefone);
         }
-
         if (tel.length() > 20) {
-            AlertUtil.exibirAviso("O telefone deve ter no máximo 20 caracteres.");
-            txtTelefoneParticipante.requestFocus();
-            return;
+            return invalido(prefixo + "O telefone deve ter no máximo 20 caracteres.", form.txtTelefone);
         }
-
         if (!tel.matches("\\d+")) {
-            AlertUtil.exibirAviso("O telefone deve conter apenas dígitos.");
-            txtTelefoneParticipante.requestFocus();
-            return;
+            return invalido(prefixo + "O telefone deve conter apenas dígitos.", form.txtTelefone);
         }
+        return true;
+    }
 
-        mostrarStep(3);
+    private boolean invalido(String mensagem, TextField campo) {
+        AlertUtil.exibirAviso(mensagem);
+        campo.requestFocus();
+        return false;
     }
 
     @FXML
     public void confirmarPagamento() {
         try {
-            String cpf = txtCpfParticipante.getText() != null ? txtCpfParticipante.getText().trim() : "";
-            String nome = txtNomeParticipante.getText() != null ? txtNomeParticipante.getText().trim() : "";
-            String email = txtEmailParticipante.getText() != null ? txtEmailParticipante.getText().trim() : "";
-            String tel = txtTelefoneParticipante.getText() != null ? txtTelefoneParticipante.getText().trim() : "";
-
-            if (cpf.isEmpty() || !ValidacaoUtil.isCpfValido(cpf) || nome.isEmpty() || email.isEmpty() || !ValidacaoUtil.isEmailValido(email) || tel.isEmpty()) {
-                AlertUtil.exibirAviso("Por favor, preencha todos os campos do participante corretamente.");
-                mostrarStep(2);
+            List<ItemCarrinho> ingressos = ingressosDoCarrinho();
+            if (ingressos.isEmpty() || ingressos.size() != formsParticipantes.size()) {
+                AlertUtil.exibirAviso("Os ingressos da venda mudaram. Revise os titulares antes de confirmar.");
+                avancarParaStep2();
                 return;
             }
+            for (int i = 0; i < formsParticipantes.size(); i++) {
+                if (!validarParticipante(formsParticipantes.get(i), i + 1)) {
+                    mostrarStep(2);
+                    return;
+                }
+            }
 
-            Participante participante = participanteService.cadastrarOuAtualizar(
-                    new ParticipanteDTO(nome, cpf, tel, email)
-            );
+            List<ItemVendaDTO> itens = new ArrayList<>();
+            List<Participante> titulares = new ArrayList<>();
+            for (int i = 0; i < ingressos.size(); i++) {
+                FormParticipante form = formsParticipantes.get(i);
+                Participante participante = participanteService.cadastrarOuAtualizar(
+                        new ParticipanteDTO(form.nome(), form.cpf(), form.telefone(), form.email())
+                );
+                titulares.add(participante);
 
-            ItemVendaDTO item = new ItemVendaDTO();
-            item.setLoteId(loteAtivo.getId());
-            item.setParticipanteId(participante.getId());
-            item.setQuantidade(1);
-            item.setPrecoUnitario(loteAtivo.getPreco());
+                Lote lote = ingressos.get(i).lote;
+                ItemVendaDTO item = new ItemVendaDTO();
+                item.setLoteId(lote.getId());
+                item.setParticipanteId(participante.getId());
+                item.setQuantidade(1);
+                item.setPrecoUnitario(lote.getPreco());
+                itens.add(item);
+            }
 
             Long usuarioId = SessaoUsuario.getInstancia().getUsuarioLogado() != null
                     ? SessaoUsuario.getInstancia().getUsuarioLogado().getId() : 1L;
 
-            Evento evento = cbEventos.getValue();
+            Evento evento = eventoDoCarrinho;
 
             VendaDTO vendaDTO = new VendaDTO();
             vendaDTO.setUsuarioId(usuarioId);
             vendaDTO.setEventoId(evento.getId());
             vendaDTO.setFormaPagamento(formaPagamentoSelecionada);
-            vendaDTO.setItens(List.of(item));
+            vendaDTO.setItens(itens);
 
             this.vendaConcluida = vendaService.registrarVenda(vendaDTO);
 
-            // Populate Step 4 Ticket Card
-            lblComprovanteEventoNome.setText(evento.getNome());
-            String dataStr = evento.getDataEvento() != null ? evento.getDataEvento().format(dateFormatter) : "";
-            String horaStr = evento.getHorario() != null ? evento.getHorario().format(timeFormatter) : "20:00";
-            String localStr = evento.getLocal() != null ? evento.getLocal() : "Local do Evento";
-            lblComprovanteEventoDetalhes.setText(dataStr + " · " + horaStr + " · " + localStr);
-
-            lblComprovanteParticipante.setText(participante.getNome());
-            lblComprovanteSetor.setText(cbSetores.getValue().getNome() + " (" + cbTiposIngresso.getValue().getNome() + ")");
-
-            if (!vendaConcluida.getIngressos().isEmpty()) {
-                lblComprovanteIdentificador.setText(vendaConcluida.getIngressos().get(0).getCodigo().toString());
-            } else {
-                lblComprovanteIdentificador.setText("GT-2026-" + String.format("%06d", vendaConcluida.getId()));
-            }
-
-            lblComprovanteStatus.setText("Ativo");
-            lblComprovanteStatus.getStyleClass().setAll("badge-ativo");
-
+            montarComprovantes(evento, ingressos, titulares);
             mostrarStep(4);
 
         } catch (Exception e) {
             AlertUtil.exibirErro("Erro ao registrar venda: " + e.getMessage());
+        }
+    }
+
+    /** Monta um cartão de comprovante por ingresso vendido (a venda devolve os ingressos na ordem dos itens). */
+    private void montarComprovantes(Evento evento, List<ItemCarrinho> ingressosCarrinho, List<Participante> titulares) {
+        String dataStr = evento.getDataEvento() != null ? evento.getDataEvento().format(dateFormatter) : "";
+        String horaStr = evento.getHorario() != null ? evento.getHorario().format(timeFormatter) : "20:00";
+        String localStr = evento.getLocal() != null ? evento.getLocal() : "Local do Evento";
+        String detalhes = dataStr + " · " + horaStr + " · " + localStr;
+
+        List<Ingresso> ingressosVendidos = vendaConcluida.getIngressos();
+        int total = ingressosVendidos.size();
+        lblVendaConcluida.setText("✓ Venda concluída — " + total + (total == 1 ? " ingresso" : " ingressos") +
+                " · " + moedaFormat.format(vendaConcluida.getValorTotal()));
+
+        flowComprovantes.getChildren().clear();
+        statusComprovantes.clear();
+        for (int i = 0; i < total; i++) {
+            Ingresso ingresso = ingressosVendidos.get(i);
+
+            Label lblNome = new Label(evento.getNome());
+            lblNome.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1F2937;");
+            Label lblDetalhes = new Label(detalhes);
+            lblDetalhes.getStyleClass().add("subtitle-light");
+
+            Label lblStatus = new Label("Ativo");
+            lblStatus.getStyleClass().setAll("badge-ativo");
+            statusComprovantes.add(lblStatus);
+
+            VBox card = new VBox(14,
+                    lblNome,
+                    lblDetalhes,
+                    new Separator(),
+                    linhaComprovante("Participante", titulares.get(i).getNome()),
+                    linhaComprovante("Setor", ingressosCarrinho.get(i).descricao()),
+                    linhaComprovante("Identificador", ingresso.getCodigo().toString()),
+                    linhaComprovante("Status", lblStatus));
+            card.getStyleClass().add("ticket-card");
+            card.setPrefWidth(480);
+            card.setMaxWidth(480);
+            flowComprovantes.getChildren().add(card);
+        }
+    }
+
+    private HBox linhaComprovante(String rotulo, String valor) {
+        Label lblValor = new Label(valor);
+        lblValor.getStyleClass().add("field-label");
+        return linhaComprovante(rotulo, lblValor);
+    }
+
+    private HBox linhaComprovante(String rotulo, Label valor) {
+        Label lblRotulo = new Label(rotulo);
+        lblRotulo.getStyleClass().add("subtitle-light");
+        lblRotulo.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(lblRotulo, Priority.ALWAYS);
+        HBox linha = new HBox(lblRotulo, valor);
+        linha.setAlignment(Pos.CENTER_LEFT);
+        return linha;
+    }
+
+    private List<UUID> codigosVendidos() {
+        return vendaConcluida.getIngressos().stream().map(Ingresso::getCodigo).toList();
+    }
+
+    private void marcarComprovantesComoEmitidos() throws SQLException {
+        for (UUID codigo : codigosVendidos()) {
+            ingressoService.marcarComoEmitido(codigo);
+        }
+        for (Label lblStatus : statusComprovantes) {
+            lblStatus.setText("Emitido / Não Utilizado");
+            lblStatus.getStyleClass().setAll("badge-ativo");
         }
     }
 
@@ -462,18 +768,17 @@ public class VendaController implements Initializable {
         }
 
         try {
-            UUID codigo = vendaConcluida.getIngressos().get(0).getCodigo();
-            boolean impresso = ingressoService.imprimirIngressoLocal(codigo, formaPagamentoSelecionada);
+            boolean impresso = ingressoService.imprimirIngressosLocal(codigosVendidos(), formaPagamentoSelecionada);
 
             if (impresso) {
-                AlertUtil.exibirSucesso("Ingresso enviado para a impressora com sucesso!");
+                AlertUtil.exibirSucesso(vendaConcluida.getIngressos().size() > 1
+                        ? "Ingressos enviados para a impressora com sucesso!"
+                        : "Ingresso enviado para a impressora com sucesso!");
             } else {
                 AlertUtil.exibirAviso("Nenhuma impressora detectada no sistema.");
             }
 
-            ingressoService.marcarComoEmitido(codigo);
-            lblComprovanteStatus.setText("Emitido / Não Utilizado");
-            lblComprovanteStatus.getStyleClass().setAll("badge-ativo");
+            marcarComprovantesComoEmitidos();
 
             boolean salvarPdf = AlertUtil.confirmar("Salvar cópia em PDF",
                     "Deseja salvar uma cópia do comprovante como arquivo PDF?");
@@ -497,11 +802,8 @@ public class VendaController implements Initializable {
         File file = fileChooser.showSaveDialog(btnPayCartao.getScene().getWindow());
         if (file != null) {
             try {
-                UUID codigo = vendaConcluida.getIngressos().get(0).getCodigo();
-                ingressoService.salvarComprovantePDF(codigo, formaPagamentoSelecionada, file.toPath());
-                ingressoService.marcarComoEmitido(codigo);
-                lblComprovanteStatus.setText("Emitido / Não Utilizado");
-                lblComprovanteStatus.getStyleClass().setAll("badge-ativo");
+                ingressoService.salvarComprovantePDF(codigosVendidos(), formaPagamentoSelecionada, file.toPath());
+                marcarComprovantesComoEmitidos();
                 AlertUtil.exibirSucesso("Comprovante salvo com sucesso em: " + file.getAbsolutePath());
             } catch (Exception e) {
                 AlertUtil.exibirErro("Erro ao salvar PDF: " + e.getMessage());
@@ -511,11 +813,13 @@ public class VendaController implements Initializable {
 
     @FXML
     public void reiniciarFluxoVenda() {
-        txtCpfParticipante.clear();
-        txtNomeParticipante.clear();
-        txtEmailParticipante.clear();
-        txtTelefoneParticipante.clear();
+        carrinho.clear();
+        eventoDoCarrinho = null;
+        formsParticipantes.clear();
+        vboxParticipantes.getChildren().clear();
+        vendaConcluida = null;
         formaPagamentoSelecionada = FormaPagamento.CARTAO_CREDITO;
+        atualizarCarrinho();
         carregarEventosAbertos();
         mostrarStep(1);
     }
