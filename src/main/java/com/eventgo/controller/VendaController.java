@@ -161,7 +161,7 @@ public class VendaController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         configurarComboBoxes();
-        spQuantidade.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 1, 1));
+        spQuantidade.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE, 1));
         carregarEventosAbertos();
         atualizarCarrinho();
         mostrarStep(1);
@@ -318,8 +318,7 @@ public class VendaController implements Initializable {
         } else {
             lblDisponibilidade.setText(disponivel + " ingressos disponíveis — " + moedaFormat.format(loteAtivo.getPreco()) + " cada");
         }
-        int max = Math.max(1, disponivel);
-        spQuantidade.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, max, 1));
+        spQuantidade.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE, 1));
         spQuantidade.setDisable(disponivel == 0);
     }
 
@@ -345,7 +344,7 @@ public class VendaController implements Initializable {
             return;
         }
         if (quantidade > disponivel) {
-            AlertUtil.exibirAviso("Quantidade indisponível. Restam " + disponivel + " ingressos deste tipo para adicionar.");
+            AlertUtil.exibirAviso("Quantidade indisponível no estoque");
             return;
         }
 
