@@ -43,7 +43,7 @@ O **GoTicket** foi desenvolvido para resolver a complexidade operacional da gest
 
 ## 5. ⚙️ Pré-requisitos
 Antes de iniciar, certifique-se de ter instalado em seu ambiente:
-- **Java JDK**: Versão 21 ou superior ([Download OpenJDK / Oracle JDK](https://adoptium.net/))
+- **Java JDK**: Versão 21 ou superior
 - **Docker e Docker Compose** (Recomendado para o banco de dados) ou **PostgreSQL 16+** instalado localmente
 - **Git** para clonagem do repositório
 
@@ -223,19 +223,18 @@ ES2/
 ---
 
 ## 10. 📸 Imagens do Sistema
-> *Insira aqui as capturas de tela das principais telas do sistema:*
 
-| Tela de Login | Painel Principal / Eventos |
+| Tela de Login | Eventos |
 | :---: | :---: |
 | ![Login](docs/screenshots/login.png) | ![Eventos](docs/screenshots/eventos.png) |
 
-| Ponto de Venda (Bilheteria) | Ingresso Gerado em PDF |
+| Realizar Venda | Controle de Portaria (Check-in)|
 | :---: | :---: |
-| ![Venda](docs/screenshots/venda.png) | ![Ingresso PDF](docs/screenshots/ingresso_pdf.png) |
+| ![Venda](docs/screenshots/venda.png) | ![Check-in](docs/screenshots/checkin.png) |
 
-| Controle de Portaria (Check-in) | Cancelamento de Ingressos |
+| Cancelamento de Ingressos | Relatórios |
 | :---: | :---: |
-| ![Check-in](docs/screenshots/checkin.png) | ![Cancelamento](docs/screenshots/cancelamento.png) |
+| ![Cancelamento](docs/screenshots/cancelamento.png) | ![Relatórios](docs/screenshots/relatorios.png) |
 
 ---
 
