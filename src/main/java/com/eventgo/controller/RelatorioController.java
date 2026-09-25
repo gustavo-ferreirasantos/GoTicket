@@ -2,7 +2,9 @@ package com.eventgo.controller;
 
 import com.eventgo.dto.VendaRelatorioDTO;
 import com.eventgo.model.Evento;
+import com.eventgo.model.Ingresso;
 import com.eventgo.model.enums.FormaPagamento;
+import com.eventgo.model.enums.StatusIngresso;
 import com.eventgo.model.enums.StatusVenda;
 import com.eventgo.service.EventoService;
 import com.eventgo.service.IngressoService;
@@ -287,40 +289,13 @@ public class RelatorioController implements Initializable {
             return;
         }
 
-        boolean imprimir = AlertUtil.confirmar("Emitir Comprovante",
-                "Deseja imprimir o comprovante na impressora local?");
+        boolean salvar = AlertUtil.confirmar("Salvar Ingresso",
+                "Deseja salvar o ingresso como arquivo PDF?");
 
-        if (imprimir) {
-            try {
-                boolean impresso = relatorioService.imprimirComprovante(
-                        venda.getVendaId(), venda.getFormaPagamento());
-                if (impresso) {
-                    AlertUtil.exibirSucesso("Comprovante enviado para a impressora com sucesso!");
-                } else {
-                    AlertUtil.exibirAviso("Nenhuma impressora detectada no sistema.");
-                }
-
-                ingressoService.marcarComoEmitido(venda.getPrimeiroIngressoCodigo());
-                perguntarSalvarPdf(venda);
-            } catch (Exception e) {
-                AlertUtil.exibirErro("Erro ao imprimir: " + e.getMessage());
-                perguntarSalvarPdf(venda);
-            }
-        } else {
-            perguntarSalvarPdf(venda);
-        }
-
-        carregarDados();
-    }
-
-    private void perguntarSalvarPdf(VendaRelatorioDTO venda) {
-        boolean salvarPdf = AlertUtil.confirmar("Salvar como PDF",
-                "Deseja salvar o comprovante como arquivo PDF?");
-
-        if (salvarPdf) {
+        if (salvar) {
             FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Salvar Comprovante PDF");
-            fileChooser.setInitialFileName("Comprovante_Venda_" + venda.getVendaId() + ".pdf");
+            fileChooser.setTitle("Salvar Ingresso PDF");
+            fileChooser.setInitialFileName("Ingresso_Venda_" + venda.getVendaId() + ".pdf");
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Documento PDF (*.pdf)", "*.pdf"));
 
             File file = fileChooser.showSaveDialog(tabelaVendas.getScene().getWindow());
@@ -328,7 +303,20 @@ public class RelatorioController implements Initializable {
                 try {
                     relatorioService.salvarComprovante(
                             venda.getVendaId(), venda.getFormaPagamento(), file.toPath());
-                    AlertUtil.exibirSucesso("Comprovante salvo com sucesso em: " + file.getAbsolutePath());
+
+                    try {
+                        List<Ingresso> ingressos = ingressoService.listarPorVenda(venda.getVendaId());
+                        for (Ingresso ing : ingressos) {
+                            if (ing.getStatus() == StatusIngresso.ATIVO) {
+                                ingressoService.marcarComoEmitido(ing.getCodigo());
+                            }
+                        }
+                    } catch (Exception ex) {
+                        ingressoService.marcarComoEmitido(venda.getPrimeiroIngressoCodigo());
+                    }
+
+                    AlertUtil.exibirSucesso("Ingresso salvo com sucesso em: " + file.getAbsolutePath());
+                    carregarDados();
                 } catch (Exception e) {
                     AlertUtil.exibirErro("Erro ao salvar PDF: " + e.getMessage());
                 }

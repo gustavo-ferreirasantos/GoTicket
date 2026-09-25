@@ -31,8 +31,26 @@ public class DatabaseMigrator {
             try (Connection conn = DatabaseConfig.getConnection();
                  Statement stmt = conn.createStatement()) {
                 
-                // Divide por comandos separados se necessário ou executa o bloco todo
+                // Executa script inicial
                 stmt.execute(sql);
+
+                // Garante atualização do constraint de perfis
+                try {
+                    stmt.execute("ALTER TABLE eventgo.usuario DROP CONSTRAINT IF EXISTS usuario_perfil_check; " +
+                                 "ALTER TABLE eventgo.usuario ADD CONSTRAINT usuario_perfil_check CHECK (perfil IN ('ADMIN', 'FUNCIONARIO', 'OPERADOR_BILHETERIA', 'OPERADOR_PORTARIA'));");
+                } catch (Exception ignored) {}
+
+                // Garante que o usuário funcionário comum padrão existe com a senha 'funcionario123'
+                try {
+                    String hashFunc = com.eventgo.util.SenhaUtil.hashSenha("funcionario123");
+                    String sqlFunc = "INSERT INTO eventgo.usuario (nome, login, senha_hash, perfil, ativo) " +
+                                     "VALUES ('Funcionário', 'funcionario', '" + hashFunc + "', 'FUNCIONARIO', true) " +
+                                     "ON CONFLICT (login) DO UPDATE SET senha_hash = EXCLUDED.senha_hash, perfil = 'FUNCIONARIO', ativo = true;";
+                    stmt.execute(sqlFunc);
+                } catch (Exception ex) {
+                    LOGGER.warning("Não foi possível criar o usuário funcionário padrão: " + ex.getMessage());
+                }
+
                 LOGGER.info("Migrations executadas com sucesso!");
             }
         } catch (Exception e) {

@@ -10,6 +10,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -25,6 +26,7 @@ import java.util.ResourceBundle;
 public class DashboardController implements Initializable {
 
     @FXML private Label lblSaudacao;
+    @FXML private Button btnCardCancelamento;
 
     @FXML private TableView<Evento> tabelaProximosEventos;
     @FXML private TableColumn<Evento, String> colNome;
@@ -44,6 +46,12 @@ public class DashboardController implements Initializable {
         Usuario user = SessaoUsuario.getInstancia().getUsuarioLogado();
         if (user != null && lblSaudacao != null) {
             lblSaudacao.setText("Olá, " + user.getNome());
+        }
+
+        if (btnCardCancelamento != null) {
+            boolean podeCancelar = SessaoUsuario.getInstancia().podeCancelarIngresso();
+            btnCardCancelamento.setVisible(podeCancelar);
+            btnCardCancelamento.setManaged(podeCancelar);
         }
 
         configurarTabela();
@@ -98,6 +106,10 @@ public class DashboardController implements Initializable {
 
     @FXML
     public void atalhoCancelamento() {
+        if (!SessaoUsuario.getInstancia().podeCancelarIngresso()) {
+            AlertUtil.exibirErro("Apenas o Administrador tem permissão para cancelar ingressos.");
+            return;
+        }
         NavigationUtil.carregarView("cancelamento.fxml");
     }
 

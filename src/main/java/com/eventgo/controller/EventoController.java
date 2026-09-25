@@ -314,16 +314,19 @@ public class EventoController implements Initializable {
             dto.setSituacao(cbEventoSituacao.getValue() != null ? cbEventoSituacao.getValue() : SituacaoEvento.ABERTO);
 
             if (eventoSelecionado == null) {
-                eventoService.cadastrar(dto);
-                AlertUtil.exibirSucesso("Evento cadastrado com sucesso!");
+                Evento novo = eventoService.cadastrar(dto);
+                AlertUtil.exibirSucesso("Evento cadastrado com sucesso!\nAdicione agora os setores e lotes para liberar a venda de ingressos.");
+                fecharModalEvento();
+                carregarEventos();
+                abrirModalSetores(novo);
+                return;
             } else {
                 dto.setId(eventoSelecionado.getId());
                 eventoService.atualizar(dto);
                 AlertUtil.exibirSucesso("Evento atualizado com sucesso!");
+                fecharModalEvento();
+                carregarEventos();
             }
-
-            fecharModalEvento();
-            carregarEventos();
 
         } catch (Exception e) {
             AlertUtil.exibirAviso("Aviso: " + e.getMessage());

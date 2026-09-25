@@ -29,17 +29,16 @@ public class RelatorioService {
     }
 
     public void salvarComprovante(Long vendaId, FormaPagamento formaPagamento, Path caminhoDestino) throws Exception {
-        List<VendaRelatorioDTO> vendas = vendaDAO.listarRelatorio(null, null, null);
-        VendaRelatorioDTO venda = vendas.stream()
-                .filter(v -> v.getVendaId().equals(vendaId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Venda não encontrada."));
-
-        if (venda.getPrimeiroIngressoCodigo() == null) {
+        List<com.eventgo.model.Ingresso> ingressos = ingressoService.listarPorVenda(vendaId);
+        if (ingressos.isEmpty()) {
             throw new IllegalStateException("Esta venda não possui ingressos associados.");
         }
 
-        ingressoService.salvarComprovantePDF(venda.getPrimeiroIngressoCodigo(), formaPagamento, caminhoDestino);
+        List<java.util.UUID> codigos = ingressos.stream()
+                .map(com.eventgo.model.Ingresso::getCodigo)
+                .toList();
+
+        ingressoService.salvarComprovantePDF(codigos, formaPagamento, caminhoDestino);
     }
 
     public byte[] emitirComprovante(Long vendaId, FormaPagamento formaPagamento) throws Exception {

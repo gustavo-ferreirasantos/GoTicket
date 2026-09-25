@@ -47,6 +47,13 @@ public class CancelamentoController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         detalhesPane.setVisible(false);
         detalhesPane.setManaged(false);
+
+        if (!SessaoUsuario.getInstancia().podeCancelarIngresso()) {
+            AlertUtil.exibirErro("Acesso restrito: apenas o Administrador tem permissão para cancelar ingressos.");
+            btnConsultar.setDisable(true);
+            btnCancelar.setDisable(true);
+            txtCodigo.setDisable(true);
+        }
     }
 
     @FXML
@@ -118,6 +125,11 @@ public class CancelamentoController implements Initializable {
 
     @FXML
     public void cancelarIngresso() {
+        if (!SessaoUsuario.getInstancia().podeCancelarIngresso()) {
+            AlertUtil.exibirErro("Apenas o Administrador tem permissão para cancelar ingressos.");
+            return;
+        }
+
         if (ingressoConsultado == null) {
             AlertUtil.exibirAviso("Consulte um ingresso antes de cancelar.");
             return;

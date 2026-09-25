@@ -2,6 +2,7 @@ package com.eventgo.model.enums;
 
 public enum Perfil {
     ADMIN("Administrador"),
+    FUNCIONARIO("Funcionário"),
     OPERADOR_BILHETERIA("Operador de Bilheteria"),
     OPERADOR_PORTARIA("Operador de Portaria");
 

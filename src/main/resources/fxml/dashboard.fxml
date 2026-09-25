@@ -22,7 +22,7 @@
                 onAction="#atalhoVenda"/>
         <Button text="Utilizar Ingresso" styleClass="shortcut-card" maxWidth="Infinity" HBox.hgrow="ALWAYS"
                 onAction="#atalhoCheckin"/>
-        <Button text="Cancelar Ingresso" styleClass="shortcut-card" maxWidth="Infinity" HBox.hgrow="ALWAYS"
+        <Button fx:id="btnCardCancelamento" text="Cancelar Ingresso" styleClass="shortcut-card" maxWidth="Infinity" HBox.hgrow="ALWAYS"
                 onAction="#atalhoCancelamento"/>
         <Button text="Gerar Relatório" styleClass="shortcut-card" maxWidth="Infinity" HBox.hgrow="ALWAYS"
                 onAction="#atalhoRelatorios"/>

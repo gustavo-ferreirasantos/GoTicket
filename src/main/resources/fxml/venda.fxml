@@ -129,7 +129,6 @@
 
             <!-- Actions -->
             <HBox spacing="12">
-                <Button text="Imprimir Comprovante" styleClass="btn-secondary" onAction="#imprimirComprovante"/>
                 <Button text="Salvar como PDF" styleClass="btn-secondary" onAction="#abrirComprovantePdf"/>
                 <Button text="Nova Venda" styleClass="btn-primary" onAction="#reiniciarFluxoVenda"/>
             </HBox>

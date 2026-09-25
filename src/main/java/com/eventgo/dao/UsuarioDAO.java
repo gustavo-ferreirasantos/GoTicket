@@ -128,7 +128,7 @@ public class UsuarioDAO {
         u.setNome(rs.getString("nome"));
         u.setLogin(rs.getString("login"));
         u.setSenhaHash(rs.getString("senha_hash"));
-        u.setPerfil(Perfil.valueOf(rs.getString("perfil")));
+        u.setPerfil(Perfil.fromString(rs.getString("perfil")));
         u.setAtivo(rs.getBoolean("ativo"));
         u.setCriadoEm(rs.getTimestamp("criado_em").toLocalDateTime());
         u.setAtualizadoEm(rs.getTimestamp("atualizado_em").toLocalDateTime());

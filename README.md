@@ -96,13 +96,14 @@ docker compose up -d
 ```
 
 ### 🔑 Credenciais de Acesso Inicial
-#### Para Funcionário Autorizado (Acesso a funcionalidade de Cancelar ingresso)
-- **Usuário**: `admin`
-- **Senha**: `admin123`
-
-#### Para Funcionário sem acesso a funcionalidade de Cancelar ingresso
-- **Usuário**: 'funcionario'
-- **Senha**: 'funcionario123'
+- **Administrador (Funcionário Autorizado)**:
+  - **Usuário**: `admin`
+  - **Senha**: `admin123`
+  - *Permissões*: Acesso total a todas as telas e operações, incluindo **Cancelar Ingresso**.
+- **Funcionário (Comum)**:
+  - **Usuário**: `funcionario`
+  - **Senha**: `funcionario123`
+  - *Permissões*: Acesso a Início, Eventos, Realizar Venda, Utilizar Ingresso (Check-in) e Relatórios. **Sem permissão para cancelar ingressos** (a opção não é exibida).
 
 ---
 

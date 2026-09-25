@@ -37,11 +37,15 @@ public class SessaoUsuario {
         return isAutenticado() && usuarioLogado.getPerfil() == Perfil.ADMIN;
     }
 
+    public boolean podeCancelarIngresso() {
+        return isAdmin();
+    }
+
     public boolean isBilheteria() {
-        return isAutenticado() && (usuarioLogado.getPerfil() == Perfil.OPERADOR_BILHETERIA || isAdmin());
+        return isAutenticado();
     }
 
     public boolean isPortaria() {
-        return isAutenticado() && (usuarioLogado.getPerfil() == Perfil.OPERADOR_PORTARIA || isAdmin());
+        return isAutenticado();
     }
 }

@@ -43,6 +43,10 @@ public class MainController implements Initializable {
     }
 
     private void configurarPermissoes() {
+        boolean podeCancelar = SessaoUsuario.getInstancia().podeCancelarIngresso();
+        btnNavCancelamento.setVisible(podeCancelar);
+        btnNavCancelamento.setManaged(podeCancelar);
+
         boolean podeUsarPortaria = SessaoUsuario.getInstancia().isPortaria();
         btnNavCheckin.setVisible(podeUsarPortaria);
         btnNavCheckin.setManaged(podeUsarPortaria);
@@ -78,6 +82,10 @@ public class MainController implements Initializable {
 
     @FXML
     public void navCancelamento() {
+        if (!SessaoUsuario.getInstancia().podeCancelarIngresso()) {
+            com.eventgo.util.AlertUtil.exibirErro("Apenas o Administrador tem permissão para cancelar ingressos.");
+            return;
+        }
         destacarBotao(btnNavCancelamento);
         NavigationUtil.carregarView("cancelamento.fxml");
     }

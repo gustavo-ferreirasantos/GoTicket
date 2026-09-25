@@ -102,4 +102,31 @@ public class UsuarioServiceTest {
         assertTrue(SenhaUtil.verificarSenha("senha123", criado.getSenhaHash()));
         verify(usuarioDAO, times(1)).inserir(any(Usuario.class));
     }
+
+    @Test
+    @DisplayName("Deve permitir autenticação com perfil FUNCIONARIO")
+    void deveAutenticarFuncionario() throws SQLException {
+        String hash = SenhaUtil.hashSenha("funcionario123");
+        Usuario usuario = new Usuario();
+        usuario.setId(2L);
+        usuario.setNome("Funcionário");
+        usuario.setLogin("funcionario");
+        usuario.setSenhaHash(hash);
+        usuario.setPerfil(Perfil.FUNCIONARIO);
+        usuario.setAtivo(true);
+
+        when(usuarioDAO.buscarPorLogin("funcionario")).thenReturn(Optional.of(usuario));
+
+        Usuario autenticado = usuarioService.autenticar("funcionario", "funcionario123");
+
+        assertNotNull(autenticado);
+        assertEquals(Perfil.FUNCIONARIO, autenticado.getPerfil());
+        assertEquals("Funcionário", autenticado.getNome());
+    }
+
+    @Test
+    @DisplayName("Deve executar DatabaseMigrator e semear funcionario")
+    void deveExecutarMigrator() {
+        com.eventgo.config.DatabaseMigrator.executarMigrations();
+    }
 }

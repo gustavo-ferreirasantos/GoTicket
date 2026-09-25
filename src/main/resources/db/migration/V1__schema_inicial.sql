@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS usuario (
     nome              VARCHAR(100)    NOT NULL,
     login             VARCHAR(50)     NOT NULL UNIQUE,
     senha_hash        VARCHAR(255)    NOT NULL,
-    perfil            VARCHAR(30)     NOT NULL CHECK (perfil IN ('ADMIN', 'OPERADOR_BILHETERIA', 'OPERADOR_PORTARIA')),
+    perfil            VARCHAR(30)     NOT NULL CHECK (perfil IN ('ADMIN', 'FUNCIONARIO', 'OPERADOR_BILHETERIA', 'OPERADOR_PORTARIA')),
     ativo             BOOLEAN         NOT NULL DEFAULT TRUE,
     criado_em         TIMESTAMP       NOT NULL DEFAULT NOW(),
     atualizado_em     TIMESTAMP       NOT NULL DEFAULT NOW()
@@ -145,8 +145,13 @@ CREATE INDEX IF NOT EXISTS idx_ingresso_status      ON ingresso(status);
 CREATE INDEX IF NOT EXISTS idx_participante_cpf     ON participante(cpf);
 
 -- ------------------------------------------------------------
--- SEED: Usuário admin padrão (senha: admin123 -> $2a$10$sXuypSuRniqFM2VMY1qoPukL0.etTqE0I7Vfpa65xcogtiI7qtK8u)
+-- SEED: Usuário admin padrão (senha: admin123)
 -- ------------------------------------------------------------
 INSERT INTO usuario (nome, login, senha_hash, perfil)
 SELECT 'Administrador', 'admin', '$2a$10$sXuypSuRniqFM2VMY1qoPukL0.etTqE0I7Vfpa65xcogtiI7qtK8u', 'ADMIN'
 WHERE NOT EXISTS (SELECT 1 FROM usuario WHERE login = 'admin');
+
+-- SEED: Usuário funcionário comum padrão (senha: funcionario123)
+INSERT INTO usuario (nome, login, senha_hash, perfil)
+SELECT 'Funcionário', 'funcionario', '$2a$10$5RhH3Y1iqKHvm3Va7haoQe6MpLjzg0UozuFR8aXDWDw2bEUHmtGfu', 'FUNCIONARIO'
+WHERE NOT EXISTS (SELECT 1 FROM usuario WHERE login = 'funcionario');
