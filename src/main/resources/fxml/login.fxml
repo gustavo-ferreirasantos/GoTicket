@@ -42,13 +42,6 @@
 
             <!-- Botão Entrar -->
             <Button fx:id="btnEntrar" text="Entrar" maxWidth="Infinity" styleClass="btn-primary" onAction="#handleLogin"/>
-
-            <!-- Dica de perfis de acesso -->
-            <VBox spacing="4" style="-fx-padding: 8 0 0 0;">
-                <Label text="Perfis disponíveis:" style="-fx-font-size: 11px; -fx-text-fill: #6B7280; -fx-font-weight: bold;"/>
-                <Label text="• Administrador: admin / admin123" style="-fx-font-size: 11px; -fx-text-fill: #6B7280;"/>
-                <Label text="• Funcionário: funcionario / funcionario123" style="-fx-font-size: 11px; -fx-text-fill: #6B7280;"/>
-            </VBox>
         </VBox>
     </StackPane>
 
