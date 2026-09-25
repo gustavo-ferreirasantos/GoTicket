@@ -96,8 +96,13 @@ docker compose up -d
 ```
 
 ### 🔑 Credenciais de Acesso Inicial
+#### Para Funcionário Autorizado (Acesso a funcionalidade de Cancelar ingresso)
 - **Usuário**: `admin`
 - **Senha**: `admin123`
+
+#### Para Funcionário sem acesso a funcionalidade de Cancelar ingresso
+- **Usuário**: 'funcionario'
+- **Senha**: 'funcionario123'
 
 ---
 
